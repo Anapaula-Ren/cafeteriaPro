@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cafetería JAVA</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Barra superior -->
+  <header class="navbar">
+    <div class="logo">☕ Cafetería JAVA</div>
+    <nav>
+      <a href="Inicio.html">Inicio</a>
+      <a href="Gestion de pedidos.html">Pedidos</a>
+      <a href="Inventario/inventario_menu.html">Inventario</a>
+      <a href="#">Panel</a>
+    </nav>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="container">
+    <h2>Pedidos</h2>
+    <div class="cards">
+
+      <!-- Tarjeta ejemplo -->
+     <!-- <div class="card">
+        <img src="https://png.pngtree.com/png-vector/20250327/ourmid/pngtree-assorted-coffee-cups-including-cappuccino-cup-with-heart-png-image_15878581.png" alt="Café con leche">
+        <h3>Café con leche</h3>
+        <p>Precio: $45</p>
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+      </div>  -->
+      <!-- para ayudar a variables-->
+      <div class="card">
+        <img src="https://png.pngtree.com/png-vector/20250327/ourmid/pngtree-assorted-coffee-cups-including-cappuccino-cup-with-heart-png-image_15878581.png" alt="Café con leche">
+        <h3 class="producto-nombre">Café con leche</h3>
+         <p class="producto-precio">Precio: $45</p> 
+        <div class="cantidad-control"> 
+         <label for="cantidad-cafe-leche">Cantidad:</label>
+        <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-cafe-leche">
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+        </div>
+      </div>
+        <!--Fin añadido-->
+      <div class="card">
+        <img src="https://www.shutterstock.com/image-photo/foamy-coffee-cappuccino-wiped-milk-600nw-2478573231.jpg" alt="Capuchino">
+        <h3 class="producto-nombre">Capuchino</h3>
+        <p class="producto-precio">Precio: $40</p>
+         <div class="cantidad-control"> 
+         <label for="cantidad-capuchino">Cantidad:</label>
+        <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-capuchino">
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+         </div>
+      </div>
+
+      <div class="card">
+        <img src="https://png.pngtree.com/png-vector/20250322/ourmid/pngtree-layered-coffee-drink-png-image_15844904.png" alt="Café helado">
+        <h3 class="producto-nombre">Café helado</h3>
+        <p class="producto-precio">Precio: $50</p>
+        <div class="cantidad-control">
+          <label for="cantidad-Cafe-helado">Cantidad:</label>
+          <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-Cafe-helado">
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+      </div>
+      </div>
+
+      <div class="card">
+        <img src="https://www.starbucksathome.com/mx/sites/default/files/2021-03/3-CaffeAmericano_LongShadow_Cream_1.png" alt="Café americano">
+        <h3 class="producto-nombre">Café Americano</h3>
+        <p class="producto-precio">Precio: $30</p>
+        <div class="cantidad-control">
+          <label for="cantidad-cafe-americano">Cantidad:</label>
+          <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-cafe-americano">
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+      </div>
+      </div>
+
+      <div class="card">
+        <img src="https://www.cocinadelirante.com/800x600/filters:format(webp):quality(75)/sites/default/files/images/2024/11/prepara-chocolate-caliente-con-bombones-y-alivia-la-tos.jpg" alt="Chocolate caliente">
+        <h3 class="producto-nombre">Chocolate caliente</h3>
+        <p class="producto-precio">Precio: $35</p>
+        <div class="cantidad-control">
+          <label for="cantidad-chocolate-caliente">Cantidad:</label>
+          <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-chocolate-caliente">
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="https://app.nutrium.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBM01kS2c9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--f11d81b72b83d24788c11ed5c66617469662f000/Pan%20Pita%20Wrap%20de%20Pollo.png" alt="Wrap de pollo">
+        <h3 class="producto-nombre">Wrap de pollo</h3>
+        <p class="producto-precio">Precio: $45</p>
+        <div class="cantidad-control">
+          <label for="cantidad-wrap-pollo">Cantidad:</label>
+          <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-wrap-pollo">
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="add">Agregar pedido</button>
+      <!--<button class="add">Agregar más pedidos</button>-->
+      <!--<button class="report">Generar reporte de ventas</button>-->
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <p>© 2025 Cafetería JAVA. Todos los derechos reservados.</p>
+      <div class="footer-links">
+        <a href="#">política de privacidad</a> |
+        <a href="#">Condiciones de servicio</a> |
+        <a href="#">Preguntas frecuentes</a>
+      </div>
+    </div>
+  </footer>
+   <!--modal-->
+  <div id="resumenModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h3>Resumen de Pedido</h3>
+        <ul id="listaPedidoModal">
+            </ul>
+        <div class="modal-footer">
+            <p><strong>Total:</strong> <span id="totalModal"></span></p>
+        </div>
+        <button id="seguirAgregando" class="add">Añadir o Actualizar Productos</button>
+        <button id="cerrarYConfirmar" class="report">Cerrar y Confirmar</button>
+    </div>
+</div>
+  <!--FinModal-->
+  <script>
+    // Variable para almacenar los productos del pedido
+let pedidoActual = [];
+
+// Referencias al Modal
+const resumenModal = document.getElementById('resumenModal');
+const listaPedidoModal = document.getElementById('listaPedidoModal');
+const totalModal = document.getElementById('totalModal');
+const closeButton = document.querySelector('.close-button');
+const cerrarYConfirmarButton = document.getElementById('cerrarYConfirmar');
+// Referencias al Nuevo Botón
+const seguirAgregandoButton = document.getElementById('seguirAgregando'); // ¡AÑADIDO!
+
+// ... el resto de tu script ...
+
+// Función para actualizar y mostrar el Modal
+function mostrarResumenPedido() {
+    listaPedidoModal.innerHTML = ''; // Limpiar lista anterior
+    let total = 0;
+
+    if (pedidoActual.length === 0) {
+        listaPedidoModal.innerHTML = '<li>No hay productos en el pedido.</li>';
+        totalModal.textContent = '$0.00';
+    } else {
+        pedidoActual.forEach(item => {
+            // Convertir precio a número decimal y calcular subtotal
+            const precioNumero = parseFloat(item.precio.replace('Precio: $', '').trim());
+            const subtotal = precioNumero * item.cantidad;
+            total += subtotal;
+
+            const li = document.createElement('li');
+            li.innerHTML = `
+                ${item.nombre} (x${item.cantidad}) - 
+                $${precioNumero.toFixed(2)} c/u = 
+                $${subtotal.toFixed(2)}
+            `;
+            listaPedidoModal.appendChild(li);
+        });
+
+        totalModal.textContent = `$${total.toFixed(2)}`;
+    }
+    
+    resumenModal.style.display = 'block'; // Mostrar el modal
+}
+
+// Lógica para cerrar el Modal
+closeButton.addEventListener('click', () => {
+    resumenModal.style.display = 'none';
+});
+
+//primer version
+/*cerrarYConfirmarButton.addEventListener('click', () => {
+    resumenModal.style.display = 'none';
+    // Aquí podrías agregar la lógica final de confirmación, como enviar los datos.
+    alert('Pedido Finalizado y Confirmado.');
+    pedidoActual = []; // Vaciar el pedido
+});*/
+//segunda version
+// ...existing code...
+
+cerrarYConfirmarButton.addEventListener('click', () => {
+    resumenModal.style.display = 'none';
+    alert('Pedido Finalizado y Confirmado.');
+    pedidoActual = []; // Vaciar el pedido
+
+    // Reiniciar los valores de cantidad en todas las tarjetas
+    document.querySelectorAll('.producto-cantidad').forEach(input => {
+        input.value = 0;
+    });
+});
+
+// ...existing code...
+
+// Cerrar modal si el usuario hace clic fuera de él
+window.addEventListener('click', (event) => {
+    if (event.target === resumenModal) {
+        resumenModal.style.display = 'none';
+    }
+});
+// Lógica del nuevo botón "Añadir Más Productos" (¡NUEVO!)
+seguirAgregandoButton.addEventListener('click', () => {
+    resumenModal.style.display = 'none';
+    // Importante: NO vaciamos el pedidoActual, solo cerramos el modal.
+});
+    //fin weas modal
+
+    // Funcionalidad básica de botones
+    const editButtons = document.querySelectorAll('.edit');
+    const deleteButtons = document.querySelectorAll('.delete');
+    const okButtons = document.querySelectorAll('.ok');
+
+   /* okButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        alert('Pedido confirmado ✅');
+      });
+    });*/
+    //modificado
+    okButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // 1. Obtener la tarjeta padre para encontrar los datos
+        const card = btn.closest('.card');
+        
+        // 2. Extraer la información usando las clases que añadimos
+        const nombreElement = card.querySelector('.producto-nombre');
+        const precioElement = card.querySelector('.producto-precio');
+        const cantidadInput = card.querySelector('.producto-cantidad');
+
+        // Validación: Asegurarse de que todos los elementos existan
+        if (!nombreElement || !precioElement || !cantidadInput) {
+            alert('Error: Faltan elementos de datos en la tarjeta (nombre/precio/cantidad).');
+            return;
+        }
+
+        const nombre = nombreElement.textContent.trim();
+        const precioTexto = precioElement.textContent.trim(); // Ej: "Precio: $45"
+        const cantidad = parseInt(cantidadInput.value, 10);
+        
+        // Validación de cantidad
+        if (cantidad < 1 || isNaN(cantidad)) {
+            alert('La cantidad debe ser un número positivo.');
+            return;
+        }
+
+        // 3. Crear el objeto producto
+        const producto = {
+          nombre: nombre,
+          precio: precioTexto, 
+          cantidad: cantidad
+        };
+
+        // 4. Añadir o actualizar al pedido actual
+        const itemExistente = pedidoActual.find(item => item.nombre === nombre);
+        if (itemExistente) {
+            // Si ya existe, SUMAR la cantidad actual (si el usuario la volvió a agregar)
+            itemExistente.cantidad += cantidad;
+        } else {
+            // Si es un producto nuevo, lo añadimos
+            pedidoActual.push(producto);
+        }
+        
+        // 5. Mostrar el modal con el resumen del pedido
+        mostrarResumenPedido();
+    });
+});
+    //fin modificado
+    //piwas version
+    
+
+editButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    // 1. Obtener la tarjeta padre
+    const card = btn.closest('.card');
+    const nombreElement = card.querySelector('.producto-nombre');
+    const cantidadInput = card.querySelector('.producto-cantidad');
+
+    if (!nombreElement || !cantidadInput) {
+      alert('Error: No se encontró el producto o cantidad.');
+      return;
+    }
+
+    const nombre = nombreElement.textContent.trim();
+    const nuevaCantidad = parseInt(cantidadInput.value, 10);
+
+    if (isNaN(nuevaCantidad) || nuevaCantidad < 1) {
+      alert('La cantidad debe ser mayor a 0.');
+      return;
+    }
+
+    // 2. Buscar el producto en el pedidoActual y actualizar la cantidad
+    const productoEnPedido = pedidoActual.find(item => item.nombre === nombre);
+    if (productoEnPedido) {
+      productoEnPedido.cantidad = nuevaCantidad;
+      mostrarResumenPedido(); // Refresca el modal con la nueva cantidad
+      alert('Cantidad actualizada en el resumen.');
+    } else {
+      alert('Este producto aún no está en el pedido. Confírmalo primero con ✔.');
+    }
+  });
+});
+
+
+    
+//Karely's version
+    /*editButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        alert('Editando pedido ✏️');
+      });
+    });*/
+    // fin edit
+    //piwas version
+    // ...existing code...
+
+deleteButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    // 1. Obtener la tarjeta padre
+    const card = btn.closest('.card');
+    const nombreElement = card.querySelector('.producto-nombre');
+    if (!nombreElement) {
+      alert('Error: No se encontró el producto.');
+      return;
+    }
+    const nombre = nombreElement.textContent.trim();
+
+    // 2. Eliminar del array pedidoActual
+    const index = pedidoActual.findIndex(item => item.nombre === nombre);
+    if (index !== -1) {
+      pedidoActual.splice(index, 1); // Elimina el producto del pedido
+      mostrarResumenPedido(); // Actualiza el modal
+      alert('Producto eliminado del resumen.');
+    } else {
+      alert('Este producto no está en el pedido.');
+    }
+  });
+});
+
+
+//karely's version
+    /*deleteButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (confirm('¿Deseas eliminar este pedido?')) {
+          btn.closest('.card').remove();
+        }
+      });
+    });*/
+  </script>
+ 
+</body>
+</html>
