@@ -23,19 +23,8 @@
     <h2>Pedidos</h2>
     <div class="cards">
 
-      <!-- Tarjeta ejemplo -->
-     <!-- <div class="card">
-        <img src="https://png.pngtree.com/png-vector/20250327/ourmid/pngtree-assorted-coffee-cups-including-cappuccino-cup-with-heart-png-image_15878581.png" alt="Café con leche">
-        <h3>Café con leche</h3>
-        <p>Precio: $45</p>
-        <div class="buttons">
-          <button class="edit">✏️</button>
-          <button class="ok">✔</button>
-          <button class="delete">❌</button>
-        </div>
-      </div>  -->
-      <!-- para ayudar a variables-->
-      <div class="card">
+         <!-- para ayudar a variables-->
+      <div class="card" data-id="1">
         <img src="https://png.pngtree.com/png-vector/20250327/ourmid/pngtree-assorted-coffee-cups-including-cappuccino-cup-with-heart-png-image_15878581.png" alt="Café con leche">
         <h3 class="producto-nombre">Café con leche</h3>
          <p class="producto-precio">Precio: $45</p> 
@@ -50,7 +39,7 @@
         </div>
       </div>
         <!--Fin añadido-->
-      <div class="card">
+      <div class="card" data-id="2">
         <img src="https://www.shutterstock.com/image-photo/foamy-coffee-cappuccino-wiped-milk-600nw-2478573231.jpg" alt="Capuchino">
         <h3 class="producto-nombre">Capuchino</h3>
         <p class="producto-precio">Precio: $40</p>
@@ -65,7 +54,7 @@
          </div>
       </div>
 
-      <div class="card">
+      <div class="card" data-id="3">
         <img src="https://png.pngtree.com/png-vector/20250322/ourmid/pngtree-layered-coffee-drink-png-image_15844904.png" alt="Café helado">
         <h3 class="producto-nombre">Café helado</h3>
         <p class="producto-precio">Precio: $50</p>
@@ -80,7 +69,7 @@
       </div>
       </div>
 
-      <div class="card">
+      <div class="card" data-id="4">
         <img src="https://www.starbucksathome.com/mx/sites/default/files/2021-03/3-CaffeAmericano_LongShadow_Cream_1.png" alt="Café americano">
         <h3 class="producto-nombre">Café Americano</h3>
         <p class="producto-precio">Precio: $30</p>
@@ -95,7 +84,7 @@
       </div>
       </div>
 
-      <div class="card">
+      <div class="card" data-id="5">
         <img src="https://www.cocinadelirante.com/800x600/filters:format(webp):quality(75)/sites/default/files/images/2024/11/prepara-chocolate-caliente-con-bombones-y-alivia-la-tos.jpg" alt="Chocolate caliente">
         <h3 class="producto-nombre">Chocolate caliente</h3>
         <p class="producto-precio">Precio: $35</p>
@@ -110,10 +99,10 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" data-id="6">
         <img src="https://app.nutrium.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBM01kS2c9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--f11d81b72b83d24788c11ed5c66617469662f000/Pan%20Pita%20Wrap%20de%20Pollo.png" alt="Wrap de pollo">
         <h3 class="producto-nombre">Wrap de pollo</h3>
-        <p class="producto-precio">Precio: $45</p>
+        <p class="producto-precio">Precio: $80</p>
         <div class="cantidad-control">
           <label for="cantidad-wrap-pollo">Cantidad:</label>
           <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-wrap-pollo">
@@ -127,7 +116,19 @@
     </div>
 
     <div class="actions">
+      <!--seleccionar mesa-->
+      <label for="selectMesa">Mesa/Cliente:</label>
+  <select id="selectMesa">
+      <option value="1">Mesa 1</option>
+      <option value="2">Mesa 2</option>
+      <option value="3">Mesa 3</option>
+      <option value="4">Mesa 4</option>
+      <option value="5">Mesa 5</option>
+      <option value="6">Para Llevar/Barra</option>
+  </select>
+
       <button class="add">Agregar pedido</button>
+
       <!--<button class="add">Agregar más pedidos</button>-->
       <!--<button class="report">Generar reporte de ventas</button>-->
     </div>
@@ -209,18 +210,73 @@ closeButton.addEventListener('click', () => {
     resumenModal.style.display = 'none';
 });
 
-//primer version
-/*cerrarYConfirmarButton.addEventListener('click', () => {
-    resumenModal.style.display = 'none';
-    // Aquí podrías agregar la lógica final de confirmación, como enviar los datos.
-    alert('Pedido Finalizado y Confirmado.');
-    pedidoActual = []; // Vaciar el pedido
-});*/
+
 //segunda version
 // ...existing code...
 
-cerrarYConfirmarButton.addEventListener('click', () => {
+cerrarYConfirmarButton.addEventListener('click', async () => {
+  if (pedidoActual.length === 0) {
+    alert('El pedido está vacío. No hay nada que confirmar.');
     resumenModal.style.display = 'none';
+    return;
+  }  
+  const idMesa = document.getElementById('selectMesa').value;
+
+  let total=0;
+  const productosParaDB = pedidoActual.map(item => {
+        const precioNumero = parseFloat(item.precio.replace('Precio: $', '').trim());
+        const subtotal = precioNumero * item.cantidad;
+        total += subtotal;
+
+        return {
+            id: item.idProducto, 
+            cantidad: item.cantidad,
+            subtotal: parseFloat(subtotal.toFixed(2))
+        };
+    });
+    // Construir el objeto principal del pedido
+    const pedidoData = {
+        // 🚨 IdCliente: Se toma de la selección de Mesa
+        idCliente: parseInt(idMesa, 10), 
+        // IdUsuario: Se toma de la sesión de Login
+        idUsuario: parseInt(localStorage.getItem('usuarioId') || '1', 10), 
+        total: parseFloat(total.toFixed(2)),
+        productos: productosParaDB
+    };
+    
+    // Validación de seguridad (opcional pero recomendada)
+    if (isNaN(pedidoData.idUsuario)) {
+        alert('Error: No se pudo identificar al empleado (ID de usuario no encontrado).');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/api/pedidos', {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(pedidoData) 
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            // Éxito: El backend se encargó de las tablas Pedidos y DetallePedidos.
+            alert(`✅ Pedido #${data.idPedido} (Mesa ${idMesa}) guardado con éxito.`);
+            
+            // Limpieza y cierre
+            pedidoActual = []; 
+            document.querySelectorAll('.producto-cantidad').forEach(input => { input.value = 0; });
+            resumenModal.style.display = 'none';
+        } else {
+            alert(`❌ Error al guardar el pedido: ${data.message || 'Error desconocido.'}`);
+        }
+
+    } catch (error) {
+        console.error('Error de conexión con el servidor:', error);
+        alert('❌ Error de conexión. Asegúrate de que tu servidor (node server.js) esté corriendo.');
+    }
+});
+  /*resumenModal.style.display = 'none';
     alert('Pedido Finalizado y Confirmado.');
     pedidoActual = []; // Vaciar el pedido
 
@@ -228,7 +284,7 @@ cerrarYConfirmarButton.addEventListener('click', () => {
     document.querySelectorAll('.producto-cantidad').forEach(input => {
         input.value = 0;
     });
-});
+});*/
 
 // ...existing code...
 
@@ -250,24 +306,20 @@ seguirAgregandoButton.addEventListener('click', () => {
     const deleteButtons = document.querySelectorAll('.delete');
     const okButtons = document.querySelectorAll('.ok');
 
-   /* okButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        alert('Pedido confirmado ✅');
-      });
-    });*/
-    //modificado
+       //modificado
     okButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         // 1. Obtener la tarjeta padre para encontrar los datos
         const card = btn.closest('.card');
         
         // 2. Extraer la información usando las clases que añadimos
-        const nombreElement = card.querySelector('.producto-nombre');
+        const idProducto= parseInt(card.dataset.id, 10); // Si necesitas el ID
+        const nombreElement = card.querySelector('.producto-nombre');
         const precioElement = card.querySelector('.producto-precio');
         const cantidadInput = card.querySelector('.producto-cantidad');
 
         // Validación: Asegurarse de que todos los elementos existan
-        if (!nombreElement || !precioElement || !cantidadInput) {
+        if (!nombreElement || !precioElement || !cantidadInput || !idProducto) {
             alert('Error: Faltan elementos de datos en la tarjeta (nombre/precio/cantidad).');
             return;
         }
@@ -284,6 +336,7 @@ seguirAgregandoButton.addEventListener('click', () => {
 
         // 3. Crear el objeto producto
         const producto = {
+          idProducto: idProducto,
           nombre: nombre,
           precio: precioTexto, 
           cantidad: cantidad
@@ -339,18 +392,6 @@ editButtons.forEach(btn => {
   });
 });
 
-
-    
-//Karely's version
-    /*editButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        alert('Editando pedido ✏️');
-      });
-    });*/
-    // fin edit
-    //piwas version
-    // ...existing code...
-
 deleteButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     // 1. Obtener la tarjeta padre
@@ -374,15 +415,6 @@ deleteButtons.forEach(btn => {
   });
 });
 
-
-//karely's version
-    /*deleteButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (confirm('¿Deseas eliminar este pedido?')) {
-          btn.closest('.card').remove();
-        }
-      });
-    });*/
   </script>
  
 </body>

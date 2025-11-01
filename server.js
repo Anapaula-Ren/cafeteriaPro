@@ -175,10 +175,88 @@ app.post('/api/inventario/productos', async (req, res) => {
 // RUTAS PARA INSERTAR DATOS (POST)
 
 // Ruta para registrar un nuevo pedido completo
+// Ruta para registrar un nuevo pedido completo
 app.post('/api/pedidos', async (req, res) => {
-    const { productos, total, idUsuario } = req.body;
+    // 1. Recibir los datos del frontend (incluyendo IdCliente)
+    const { idCliente, total, idUsuario, productos } = req.body; 
 
     let connection;
+    try {
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        // 2. Insertar en la tabla PEDIDOS (IdCliente, Total, IdUsuario, Estado)
+        const pedidoQuery = 'INSERT INTO Pedidos (IdCliente, Total, IdUsuario) VALUES (?, ?, ?)';
+        const [pedidoResult] = await connection.query(pedidoQuery, [idCliente, total, idUsuario]);
+        const idPedido = pedidoResult.insertId;
+
+        // 3. Insertar cada producto en DETALLE_PEDIDOS y actualizar stock
+        for (const producto of productos) {
+            // Insertar detalle (DetallePedidos)
+            await connection.query(
+                // OJO: Asegúrate de que el nombre de la tabla sea 'DetallePedidos' o 'Detalle_Pedidos' según tu esquema
+                'INSERT INTO detallepedidos (IdPedido, IdProducto, Cantidad, Subtotal) VALUES (?, ?, ?, ?)',
+                [idPedido, producto.id, producto.cantidad, producto.subtotal]
+            );
+
+            // Actualizar stock (Productos)
+            await connection.query(
+                'UPDATE Productos SET Stock = Stock - ? WHERE IdProducto = ?',
+                [producto.cantidad, producto.id]
+            );
+        }
+
+        // 4. Confirmar la transacción
+        await connection.commit();
+        res.json({ 
+            success: true, 
+            message: 'Pedido registrado correctamente',
+            idPedido 
+        });
+
+    } catch (error) {
+        if (connection) {
+            await connection.rollback();
+        }
+        console.error('Error al registrar pedido:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error al registrar el pedido' 
+        });
+    } finally {
+        if (connection) {
+            connection.release();
+        }
+    }
+});
+
+/*app.post('/api/pedidos', async (req, res) => {
+    const { productos, total, idUsuario } = req.body;
+
+    let connection;*/
+  /*app.post('/api/pedidos', async (req, res) => {
+    // 🚨 MODIFICACIÓN 1: Añadimos 'idCliente' para recibir el número de mesa
+    const { idCliente, total, idUsuario, productos } = req.body; 
+
+    let connection;
+    try {
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        // 2. Insertar en la tabla PEDIDOS (Incluyendo IdCliente)
+        // 🚨 MODIFICACIÓN 2: Añadimos 'IdCliente' al INSERT SQL
+        const pedidoQuery = 'INSERT INTO Pedidos (IdCliente, Total, IdUsuario, Estado) VALUES (?, ?, ?, "Pendiente")';
+        
+        // 🚨 MODIFICACIÓN 3: Pasamos 'idCliente' como primer parámetro
+        const [pedidoResult] = await connection.query(pedidoQuery, [idCliente, total, idUsuario]);
+        const idPedido = pedidoResult.insertId;
+
+        // 2. Insertar cada producto en DETALLE_PEDIDOS y actualizar stock (ESTO NO CAMBIA, ya funciona)
+        for (const producto of productos) {
+            // ... (el resto del for loop es correcto)
+        }
+// ... (resto del try/catch/finally)
+
     try {
         connection = await pool.getConnection();
         await connection.beginTransaction();
@@ -225,10 +303,12 @@ app.post('/api/pedidos', async (req, res) => {
             connection.release();
         }
     }
-});
+});*/
+
+
 
 // Obtener todos los pedidos
-app.get('/api/pedidos', async (req, res) => {
+/*app.get('/api/pedidos', async (req, res) => {
     try {
         const query = `
             SELECT 
@@ -243,7 +323,7 @@ app.get('/api/pedidos', async (req, res) => {
                 ) as Productos
             FROM Pedidos p
             JOIN Usuarios u ON p.IdUsuario = u.IdUsuario
-            JOIN Detalle_Pedidos dp ON p.IdPedido = dp.IdPedido
+            JOIN detallepedidos dp ON p.IdPedido = dp.IdPedido
             JOIN Productos pr ON dp.IdProducto = pr.IdProducto
             GROUP BY p.IdPedido
             ORDER BY p.Fecha DESC
@@ -255,9 +335,9 @@ app.get('/api/pedidos', async (req, res) => {
         console.error('Error al obtener pedidos:', error);
         res.status(500).json({ error: 'Error al obtener pedidos' });
     }
-});
+});*/
 
-// Actualizar estado de un pedido
+/*// Actualizar estado de un pedido
 app.put('/api/pedidos/:id/estado', async (req, res) => {
     const { id } = req.params;
     const { estado } = req.body;
@@ -272,7 +352,7 @@ app.put('/api/pedidos/:id/estado', async (req, res) => {
         console.error('Error al actualizar estado:', error);
         res.status(500).json({ error: 'Error al actualizar estado del pedido' });
     }
-});
+});*/
 
 // ====================================================================
 // PASO 4: INICIAR EL SERVIDOR
