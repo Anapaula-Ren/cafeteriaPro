@@ -171,6 +171,76 @@ app.post('/api/inventario/productos', async (req, res) => {
   }
 });
 
+// get oedido o algo asi nose pal papnel
+// --- RUTAS DE PEDIDOS PARA EL PANEL DE VISUALIZACIÓN ---
+
+// Ruta 1: Para obtener la lista de pedidos principales (Panel, tabla izquierda)
+// Elimina la columna 'Estado' de la consulta
+app.get('/api/pedidos', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                p.IdPedido,
+                c.Nombre AS NombreCliente,  -- Nombre de la mesa/cliente
+                p.Fecha,
+                p.Total,
+                u.Nombre AS NombreUsuario   -- Nombre del empleado
+            FROM Pedidos p
+            JOIN Clientes c ON p.IdCliente = c.IdCliente
+            JOIN Usuarios u ON p.IdUsuario = u.IdUsuario
+            ORDER BY p.Fecha DESC;
+        `;
+        
+        const [results] = await pool.query(query);
+        res.json(results);
+    } catch (error) {
+        console.error('Error al obtener pedidos para el panel:', error);
+        res.status(500).json({ error: 'Error al obtener lista de pedidos' });
+    }
+});
+
+// Ruta 2: Para obtener el detalle de un pedido específico (Panel, ticket derecho)
+// Se asume que la tabla de detalles se llama DetallePedidos (sin guion bajo)
+app.get('/api/pedidos/:id/detalle', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const query = `
+            SELECT 
+                dp.Cantidad,
+                dp.Subtotal,
+                p.Nombre AS NombreProducto,
+                p.Precio AS PrecioUnitario
+            FROM DetallePedidos dp
+            JOIN Productos p ON dp.IdProducto = p.IdProducto
+            WHERE dp.IdPedido = ?;
+        `;
+        
+        const [results] = await pool.query(query, [id]);
+        res.json(results);
+    } catch (error) {
+        console.error('Error al obtener el detalle del pedido:', error);
+        res.status(500).json({ error: 'Error al obtener detalles del pedido' });
+    }
+});
+
+// Ruta que ya tenías para actualizar stock, la mantenemos aquí para no borrarla
+// Actualizar stock de un producto
+/*app.put('/api/inventario/productos/:id', async (req, res) => {
+    const { id } = req.params;
+    const { stock } = req.body;
+    
+    try {
+        await pool.query(
+            'UPDATE Productos SET Stock = ? WHERE IdProducto = ?',
+            [stock, id]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error al actualizar stock:', error);
+        res.status(500).json({ error: 'Error al actualizar stock' });
+    }
+});*/
+
 
 // RUTAS PARA INSERTAR DATOS (POST)
 
