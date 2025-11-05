@@ -9,6 +9,9 @@ const path = require('path');
 // Importamos mysql2/promise para usar async/await y transacciones
 const mysql = require('mysql2/promise'); 
 const cors = require('cors'); 
+// mails
+// Dentro de server.js
+const nodemailer = require('nodemailer'); // ⬅️ Añadir esta línea
 
 const app = express();
 // Puerto del servidor (tomado de .env o 3000 por defecto)
@@ -297,6 +300,48 @@ app.post('/api/pedidos', async (req, res) => {
         if (connection) {
             connection.release();
         }
+    }
+});
+
+
+// RUTA PARA ENVIAR CORREO DE ORDEN DE INVENTARIO
+app.post('/api/ordenar', async (req, res) => {
+    // 1. Recibir datos del frontend (incluyendo el correo de destino)
+    const { producto, cantidad, motivo, destino, usuarioNombre } = req.body; 
+
+    // 2. Configuración del transportador (usando Gmail como ejemplo)
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER, // Tu correo (del .env)
+            pass: process.env.EMAIL_PASS  // Tu contraseña/token (del .env)
+        }
+    });
+
+    // 3. Contenido del correo
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: destino, // ⬅️ Usamos el correo ingresado por el usuario en el modal
+        subject: `ORDEN DE COMPRA: ${producto} - URGENCIAS`,
+        html: `
+            <h3>Nueva Solicitud de Orden de Compra</h3>
+            <p>El empleado ${usuarioNombre || 'Sistema'} ha solicitado una orden urgente de inventario.</p>
+            <hr>
+            <p><strong>Producto Solicitado:</strong> ${producto}</p>
+            <p><strong>Cantidad a Ordenar:</strong> ${cantidad} unidades</p>
+            <p><strong>Motivo / Observaciones:</strong> ${motivo || 'No especificado'}</p>
+            <p>Por favor, procesar esta orden lo antes posible.</p>
+        `
+    };
+
+    // 4. Envío del correo
+    try {
+        let info = await transporter.sendMail(mailOptions);
+        console.log("✅ Correo enviado: %s", info.messageId);
+        res.json({ success: true, message: 'Orden de compra enviada por correo con éxito.' });
+    } catch (error) {
+        console.error("❌ Error al enviar el correo:", error);
+        res.status(500).json({ success: false, message: 'Fallo al enviar el correo de orden. Revise credenciales en .env.' });
     }
 });
 
