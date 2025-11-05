@@ -33,6 +33,10 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   port: process.env.DB_PORT // 3306 por defecto
 });
+// Lineas de inventario
+const inventarioRoutes = require('./inventarioroutes')(pool);
+app.use('/api/inventario', inventarioRoutes);
+// Fin lineas inventario
 
 // Función para verificar la conexión al iniciar el servidor
 async function testDbConnection() {

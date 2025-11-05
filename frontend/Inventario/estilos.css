@@ -247,3 +247,103 @@ h4 {
     from { transform: scale(0.9); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
+.form_grupo small {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 4px;
+}
+.form_grupo p {
+    font-size: 0.9rem;
+    color: #4e342e;
+    margin: 0;
+}
+.form_grupo p b {
+    color: #6d4c41;
+}
+#peso_unidad {
+    font-weight: bold;
+    color: #6d4c41;
+}
+#nombre_producto,
+#total_gramos {
+    width: 70% !important;
+    padding: 6px;
+    font-size: 0.95rem;
+}
+/* Estilos para el modal de ordenar */
+#ordenModal .modal-content {
+    background: linear-gradient(180deg, #ffffff 0%, #f7f3f0 100%);
+    border-radius: 10px;
+    width: 90%;
+    max-width: 420px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: popIn 0.35s ease-out;
+    position: relative;
+    padding: 20px;
+}
+
+#ordenModal h3 {
+    color: #5D4037;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+#ordenModal label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #4e342e;
+}
+
+#ordenModal input,
+#ordenModal textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+#ordenModal input:focus,
+#ordenModal textarea:focus {
+    border-color: #6d4c41;
+    box-shadow: 0 0 6px rgba(109, 76, 65, 0.4);
+    outline: none;
+}
+
+#ordenModal button[type="submit"] {
+    background-color: #6d4c41;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+#ordenModal button[type="submit"]:hover {
+    background-color: #4e342e;
+    transform: scale(1.02);
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #5D4037;
+    transition: color 0.3s;
+}
+
+.close-button:hover {
+    color: #ff6b6b;
+}
