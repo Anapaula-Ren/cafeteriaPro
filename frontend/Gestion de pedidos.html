@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cafetería JAVA</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Barra superior -->
-  <header class="navbar">
-    <div class="logo">☕ Cafetería JAVA</div>
+  <!-- Encabezado -->
+  <header>
+    <h1><i class="fa-solid fa-mug-saucer" style="color: #ffffff;"></i> Cafetería JAVA</h1>
     <nav>
       <a href="Inicio.html">Inicio</a>
-      <a href="Gestion de pedidos.html">Pedidos</a>
+      <a href="#" class="activo">Pedidos</a>
       <a href="Inventario/inventario_menu.html">Inventario</a>
       <a href="Panel.html">Panel</a>
+      <a href="InicioSesion.html">Cerrar sesion</a>
     </nav>
   </header>
 
@@ -117,17 +120,17 @@
 
     <div class="actions">
       <!--seleccionar mesa-->
-      <label for="selectMesa">Mesa/Cliente:</label>
-  <select id="selectMesa">
-      <option value="1">Mesa 1</option>
-      <option value="2">Mesa 2</option>
-      <option value="3">Mesa 3</option>
-      <option value="4">Mesa 4</option>
-      <option value="5">Mesa 5</option>
-      <option value="6">Para Llevar/Barra</option>
-  </select>
-
-      <button class="add">Agregar pedido</button>
+      <div class="mesa-selector-container">
+        <label for="selectMesa">Mesa/Cliente</label>
+        <select id="selectMesa">
+          <option value="1">Mesa 1</option>
+          <option value="2">Mesa 2</option>
+          <option value="3">Mesa 3</option>
+          <option value="4">Mesa 4</option>
+          <option value="5">Mesa 5</option>
+          <option value="6">Para Llevar/Barra</option>
+        </select>
+      </div>
 
       <!--<button class="add">Agregar más pedidos</button>-->
       <!--<button class="report">Generar reporte de ventas</button>-->
@@ -139,9 +142,9 @@
     <div class="footer-content">
       <p>© 2025 Cafetería JAVA. Todos los derechos reservados.</p>
       <div class="footer-links">
-        <a href="#">política de privacidad</a> |
-        <a href="#">Condiciones de servicio</a> |
-        <a href="#">Preguntas frecuentes</a>
+        <a href="politica_privacidad.html">Política de privacidad</a> |
+        <a href="condiciones_servicio.html">Condiciones de servicio</a> |
+        <a href="preguntas_frecuentes.html">Preguntas frecuentes</a>
       </div>
     </div>
   </footer>
@@ -308,15 +311,15 @@ seguirAgregandoButton.addEventListener('click', () => {
 
        //modificado
     okButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        // 1. Obtener la tarjeta padre para encontrar los datos
-        const card = btn.closest('.card');
-        
-        // 2. Extraer la información usando las clases que añadimos
-        const idProducto= parseInt(card.dataset.id, 10); // Si necesitas el ID
+    btn.addEventListener('click', () => {
+        // 1. Obtener la tarjeta padre para encontrar los datos
+        const card = btn.closest('.card');
+        
+        // 2. Extraer la información usando las clases que añadimos
+        const idProducto= parseInt(card.dataset.id, 10); // Si necesitas el ID
         const nombreElement = card.querySelector('.producto-nombre');
-        const precioElement = card.querySelector('.producto-precio');
-        const cantidadInput = card.querySelector('.producto-cantidad');
+        const precioElement = card.querySelector('.producto-precio');
+        const cantidadInput = card.querySelector('.producto-cantidad');
 
         // Validación: Asegurarse de que todos los elementos existan
         if (!nombreElement || !precioElement || !cantidadInput || !idProducto) {
@@ -324,9 +327,9 @@ seguirAgregandoButton.addEventListener('click', () => {
             return;
         }
 
-        const nombre = nombreElement.textContent.trim();
-        const precioTexto = precioElement.textContent.trim(); // Ej: "Precio: $45"
-        const cantidad = parseInt(cantidadInput.value, 10);
+        const nombre = nombreElement.textContent.trim();
+        const precioTexto = precioElement.textContent.trim(); // Ej: "Precio: $45"
+        const cantidad = parseInt(cantidadInput.value, 10);
         
         // Validación de cantidad
         if (cantidad < 1 || isNaN(cantidad)) {
@@ -334,15 +337,15 @@ seguirAgregandoButton.addEventListener('click', () => {
             return;
         }
 
-        // 3. Crear el objeto producto
-        const producto = {
-          idProducto: idProducto,
-          nombre: nombre,
-          precio: precioTexto, 
-          cantidad: cantidad
-        };
+        // 3. Crear el objeto producto
+        const producto = {
+          idProducto: idProducto,
+          nombre: nombre,
+          precio: precioTexto, 
+          cantidad: cantidad
+        };
 
-        // 4. Añadir o actualizar al pedido actual
+        // 4. Añadir o actualizar al pedido actual
         const itemExistente = pedidoActual.find(item => item.nombre === nombre);
         if (itemExistente) {
             // Si ya existe, SUMAR la cantidad actual (si el usuario la volvió a agregar)
@@ -353,8 +356,8 @@ seguirAgregandoButton.addEventListener('click', () => {
         }
         
         // 5. Mostrar el modal con el resumen del pedido
-        mostrarResumenPedido();
-    });
+        mostrarResumenPedido();
+    });
 });
     //fin modificado
     //piwas version
