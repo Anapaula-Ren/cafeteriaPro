@@ -7,19 +7,38 @@ body {
 main { 
     box-sizing: border-box; 
     padding: 40px; 
+    margin: 20px auto;
+    padding: 20px 40px 40px 40px;
+    border-radius: 10px;
+    min-height: calc(100vh - 250px);
 }
 header {
-    background-color: #6d4c41;
+    background-color: #5a3d31;
     color: white;
-    padding: 2px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 15px 60px;
+}
+
+header h1 {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 18px;
+    margin: 0;
+}
+
+header h1 i {
+    margin-right: 8px;
+    font-size: 24px;
 }
 header nav a {
     color: white;
-    margin: 0 10px;
+    margin-left: 25px;
     text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
 }
 header nav a.activo {
     font-weight: bold;
@@ -36,6 +55,11 @@ footer nav a {
     color: #ffffff;
     text-decoration: none;
     margin: 0 5px;
+}
+.producto p {
+    font-size: 0.85rem;  
+    margin: 5px 0;
+    white-space: nowrap; /* Evita que se rompa la línea */
 }
 .menu_inventario {
     display: flex;
