@@ -1,32 +1,60 @@
+/* Fuente base */
 body {
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Poppins', sans-serif;
   margin: 0;
   background-color: #f5f5f5;
 }
 
-/* --- BARRA SUPERIOR --- */
-.navbar {
-  background-color: #4e2c2a;
+/* --- ENCABEZADO (del estilo de Inicio) --- */
+header {
+  background-color: #5a3d31;
   color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 30px;
+  padding: 15px 60px;
+  position: sticky;
+  top: 0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+header h1 i {
+    margin-right: 8px;
+    font-size: 24px;
 }
 
-.navbar .logo {
-  font-weight: bold;
+header h1 {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 18px;
+    margin: 0;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 18px;
 }
 
-.navbar a {
+.logo .icon {
+  margin-right: 8px;
+  font-size: 22px;
+}
+
+nav a {
   color: white;
-  margin: 0 10px;
+  margin-left: 25px;
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.3s ease;
 }
 
-.navbar a:hover {
-  text-decoration: underline;
+nav a:hover {
+  color: #ffddbc;
+}
+header nav a.activo {
+    color: #ffddbc;
 }
 
 /* --- CONTENIDO PRINCIPAL --- */
@@ -55,6 +83,12 @@ h2 {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   padding: 10px;
   text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
 
 .card img {
@@ -76,56 +110,134 @@ h2 {
 /* --- BOTONES DE CADA TARJETA --- */
 .buttons {
   display: flex;
-  justify-content: flex-end; /* Alinea a la derecha */
-  gap: 8px;
+  justify-content: flex-end;
+  gap: 5px;
   margin-top: 10px;
   padding-right: 8px;
 }
 
 .buttons button {
   border: none;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.2s ease;
+  line-height: 1;
+  padding: 0;
+  overflow: hidden;
 }
 
 /* Colores individuales */
 .ok {
-  background-color: #198754; /* verde */
+  background-color: #198754;
   color: white;
 }
 
 .edit {
-  background-color: #e0e0e0; /* gris claro */
+  background-color: #e0e0e0;
   color: #000;
 }
 
 .delete {
-  background-color: #dc3545; /* rojo */
+  background-color: #dc3545;
   color: white;
 }
 
-/* Hover */
+/* Hover sin flotación individual */
 .ok:hover { background-color: #157347; }
 .edit:hover { background-color: #cfcfcf; }
 .delete:hover { background-color: #b02a37; }
 
-/* --- BOTONES INFERIORES --- */
+/* Efecto al hacer clic */
+.buttons button:active {
+  transform: scale(0.95);
+}
+
+/* --- SECCIÓN DE ACCIONES (con selector de mesa mejorado) --- */
 .actions {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-top: 30px;
+  gap: 20px;
+  padding: 30px;
+  background: linear-gradient(135deg, #f9f9f9 0%, #ece1dc 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.mesa-selector-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.mesa-selector-container label {
+  font-weight: 600;
+  color: #3b1f1f;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 
+.mesa-selector-container label::before {
+  content: "🪑";
+  font-size: 1.4rem;
+}
+
+#selectMesa {
+  padding: 14px 24px;
+  border: 3px solid #5a3d31;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  background: whitesmoke;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 80%;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a3d31' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px;
+  padding-right: 45px;
+  box-shadow: 0 2px 8px rgba(90, 61, 49, 0.1);
+}
+
+#selectMesa:hover {
+  border-color: #6f4e37;
+  background-color: #f7f4f2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(90, 61, 49, 0.2);
+}
+
+#selectMesa:focus {
+  outline: none;
+  border-color: #6f4e37;
+  box-shadow: 0 0 0 4px rgba(90, 61, 49, 0.15);
+}
+
+#selectMesa option {
+  padding: 10px;
+  background-color: white;
+  color: #3b1f1f;
+  font-weight: 500;
+}
+
 .add {
-  background-color: #000;
+  background-color: #5a3d31;
   color: white;
   border: none;
   padding: 12px;
@@ -148,21 +260,30 @@ h2 {
   font-weight: bold;
 }
 
-.add:hover { background-color: #222; }
+.add:hover { background-color: #30201a; }
 .report:hover { background-color: #c3c1f0; }
 
 /* --- FOOTER --- */
 footer {
-  background-color: #4e2c2a;
+  background-color: #5a3d31;
   color: white;
   text-align: center;
-  padding: 15px 10px;
+  padding: 20px 10px;
   margin-top: 30px;
   font-size: 14px;
 }
 
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-content p {
+  margin: 5px 0;
+}
+
 .footer-links {
-  margin-top: 5px;
+  margin-top: 8px;
   color: #dcdcdc;
 }
 
@@ -170,9 +291,11 @@ footer {
   color: #dcdcdc;
   text-decoration: none;
   margin: 0 4px;
+  transition: color 0.3s ease;
 }
 
 .footer-links a:hover {
+  color: #ffddbc;
   text-decoration: underline;
 }
 
@@ -234,10 +357,10 @@ footer {
 
 /* Estilos para el control de cantidad (opcional) */
 .cantidad-control {
-    margin: 10px 0;
+    margin: 8px 0;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
 }
 
 .producto-cantidad {
@@ -246,4 +369,22 @@ footer {
     text-align: center;
     border: 1px solid #ccc;
     border-radius: 4px;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    text-align: center;
+    padding: 15px;
+  }
+
+  nav a {
+    display: inline-block;
+    margin: 10px;
+  }
+
+  footer {
+    padding: 20px;
+  }
 }
