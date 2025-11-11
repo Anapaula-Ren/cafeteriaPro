@@ -1,5 +1,5 @@
 body {
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Poppins', sans-serif;
   margin: 0;
   background-color: #f5f5f5;
   min-height: 100vh;
@@ -7,95 +7,190 @@ body {
   flex-direction: column;
 }
 
-/* --- BARRA SUPERIOR --- */
-.navbar {
-  background-color: #4e2c2a;
+/* --- ENCABEZADO (igual que tus otras páginas) --- */
+header {
+  background-color: #5a3d31;
   color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 30px;
+  padding: 15px 60px;
+  position: sticky;
+  top: 0;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 100;
 }
 
-.navbar .logo {
-  font-weight: bold;
+header h1 {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 18px;
+  margin: 0;
 }
 
-.navbar a {
+header h1 i {
+  margin-right: 8px;
+  font-size: 24px;
+}
+
+header nav a {
   color: white;
-  margin: 0 10px;
+  margin-left: 25px;
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.3s ease;
 }
 
-.navbar a:hover {
+header nav a:hover,
+header nav a.activo {
+  color: #ffddbc;
+}
+
+/* --- ESTILOS DEL PANEL --- */
+.panel-layout {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  flex: 1;
+}
+
+/* Columna Izquierda: 2/3 de la pantalla (Lista de Órdenes) */
+.order-list-container {
+  flex: 2; 
+  min-width: 60%;
+  background-color: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Columna Derecha: 1/3 de la pantalla (Detalles/Ticket) */
+.order-detail-container {
+  flex: 1;
+  min-width: 30%;
+  background-color: #f7f7f7;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 80px; /* Ajustado para que no se tape con el header sticky */
+  height: fit-content;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+/* Estilo para las filas de la tabla */
+.order-row {
+  cursor: pointer;
+  padding: 10px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #ddd;
+  transition: background-color 0.3s;
+  display: grid;
+  grid-template-columns: 0.5fr 1fr 1.5fr 1fr;
+}
+
+.order-row:hover, 
+.order-row.active {
+  background-color: #e0d5cf; /* Color café claro consistente */
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.detail-table th, 
+.detail-table td {
+  text-align: left;
+  padding: 8px 0;
+  border-bottom: 1px dashed #aaa;
+}
+
+.detail-table th {
+  color: #5a3d31; /* Color café oscuro consistente */
+  font-weight: 600;
+}
+
+footer {
+  background-color: #5a3d31;
+  color: white;
+  text-align: center;
+  padding: 20px 10px;
+  margin-top: auto;
+  font-size: 14px;
+}
+
+footer p {
+  margin: 5px 0;
+}
+
+footer nav {
+  margin-top: 8px;
+  color: #dcdcdc;
+}
+
+footer nav a {
+  color: #dcdcdc;
+  text-decoration: none;
+  margin: 0 4px;
+  transition: color 0.3s ease;
+}
+
+footer nav a:hover {
+  color: #ffddbc;
   text-decoration: underline;
 }
 
-/* Estilos CSS específicos para el layout del Panel */
-        
-        .panel-layout {
-            display: flex;
-            gap: 20px;
-            padding: 20px;
-            /* Ocupa casi todo el ancho disponible */
-        }
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    text-align: center;
+    padding: 15px;
+  }
 
-        /* Columna Izquierda: 2/3 de la pantalla (Lista de Órdenes) */
-        .order-list-container {
-            flex: 2; 
-            min-width: 60%;
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+  header nav a {
+    display: inline-block;
+    margin: 10px;
+  }
 
-        /* Columna Derecha: 1/3 de la pantalla (Detalles/Ticket) */
-        .order-detail-container {
-            flex: 1;
-            min-width: 30%;
-            background-color: #f7f7f7;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            position: sticky; /* Se mantiene visible al hacer scroll en la lista */
-            top: 20px;
-            height: fit-content;
-        }
+  .panel-layout {
+    flex-direction: column;
+  }
 
-        /* Estilo para las filas de la tabla */
-        .order-row {
-            cursor: pointer;
-            padding: 10px;
-            margin-bottom: 5px;
-            border-bottom: 1px solid #ddd;
-            transition: background-color 0.3s;
-            display: grid;
-            grid-template-columns: 0.5fr 1fr 1.5fr 1fr; /* ID, Mesa, Fecha, Total */
-        }
-        .order-row:hover, .order-row.active {
-            background-color: #e0e0e0; /* Color café claro de tus estilos si lo tienes */
-        }
-        
-        .detail-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        .detail-table th, .detail-table td {
-            text-align: left;
-            padding: 8px 0;
-            border-bottom: 1px dashed #aaa;
-        }
-        .detail-table th {
-            color: #5d4037; /* Color café oscuro */
-        }
-        footer {
-  background-color: #4e2c2a;
-  color: white;
-  text-align: center;
-  padding: 15px 10px;
-  font-size: 14px;
-  margin-top: auto;
+  .order-list-container,
+  .order-detail-container {
+    min-width: 100%;
+  }
+
+  .order-detail-container {
+    position: relative;
+    top: 0;
+  }
+
+  footer {
+    padding: 20px;
+  }
+}
+.footer-links a:hover {
+  color: #ffddbc;
+  text-decoration: underline;
+}
+.footer-content p {
+  margin: 5px 0;
+}
+
+.footer-links {
+  margin-top: 8px;
+  color: #dcdcdc;
+}
+
+.footer-links a {
+  color: #dcdcdc;
+  text-decoration: none;
+  margin: 0 4px;
+  transition: color 0.3s ease;
 }
