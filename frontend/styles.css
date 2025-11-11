@@ -15,7 +15,9 @@ body {
   align-items: center;
   padding: 10px 40px;
 }
-
+header nav a.activo {
+    color: #ffddbc;
+}
 .top-bar nav a {
   color: white;
   text-decoration: none;
