@@ -116,6 +116,76 @@
         </div>
         </div>
       </div>
+      <div class="card" data-id="7">
+        <img src="Inventario/imagenes/sandwich_jamon_queso.jpg" alt="Sandwich de jamon y queso">
+        <h3 class="producto-nombre">Sandwich de Jamon y Queso</h3>
+        <p class="producto-precio">Precio: $60</p>
+        <div class="cantidad-control">
+          <label for="cantidad-sandwich">Cantidad:</label>
+          <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-sandwich">
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+      </div>
+      </div>
+      <div class="card" data-id="8">
+        <img src="Inventario/imagenes/croissant.jpg" alt="Croissant">
+        <h3 class="producto-nombre">Croissant</h3>
+        <p class="producto-precio">Precio: $30</p>
+        <div class="cantidad-control">
+          <label for="cantidad-croissant">Cantidad:</label>
+          <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-croissant">
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+      </div>
+      </div>
+      <div class="card" data-id="9">
+        <img src="Inventario/imagenes/muffin.jpg" alt="Muffin">
+        <h3 class="producto-nombre">Muffin</h3>
+        <p class="producto-precio">Precio: $25</p>
+        <div class="cantidad-control">
+          <label for="cantidad-muffin">Cantidad:</label>
+          <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-muffin">
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+      </div>
+      </div>
+      <div class="card" data-id="10">
+        <img src="Inventario/imagenes/brownie.jpg" alt="Brownie">
+        <h3 class="producto-nombre">Brownie</h3>
+        <p class="producto-precio">Precio: $30</p>
+        <div class="cantidad-control">
+          <label for="cantidad-brownie">Cantidad:</label>
+          <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-brownie">
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+      </div>
+      </div>
+      <div class="card" data-id="11">
+        <img src="Inventario/imagenes/dona.jpg" alt="Dona">
+        <h3 class="producto-nombre">Dona</h3>
+        <p class="producto-precio">Precio: $25</p>
+        <div class="cantidad-control">
+          <label for="cantidad-dona">Cantidad:</label>
+          <input type="number" value="0" min="0" class="producto-cantidad" id="cantidad-dona">
+        <div class="buttons">
+          <button class="edit">✏️</button>
+          <button class="ok">✔</button>
+          <button class="delete">❌</button>
+        </div>
+      </div>
+      </div>
     </div>
 
     <div class="actions">
@@ -165,7 +235,32 @@
   <!--FinModal-->
   <script>
     // Variable para almacenar los productos del pedido
+
 let pedidoActual = [];
+
+// Función para limpiar el pedido y resetear la interfaz
+function cancelarPedidoYLimpiar() {
+    // 1. Vaciar el array del pedido en memoria
+    pedidoActual = []; 
+    
+    // 2. Resetear todas las cantidades de los inputs de producto a 0
+    document.querySelectorAll('.producto-cantidad').forEach(input => {
+        input.value = 0;
+    });
+    
+    // 🚨 CLAVE: Habilitar TODOS los botones OK para el próximo pedido
+    document.querySelectorAll('.ok').forEach(button => {
+        button.disabled = false;
+        button.style.backgroundColor = ''; // Restablecer color
+        button.style.cursor = 'pointer';
+    });
+
+    // 3. Ocultar el modal
+    resumenModal.style.display = 'none';
+    
+    // 4. Notificar al usuario
+    alert('❌ Pedido Cancelado. El carrito ha sido vaciado.');
+}
 
 // Referencias al Modal
 const resumenModal = document.getElementById('resumenModal');
@@ -175,6 +270,7 @@ const closeButton = document.querySelector('.close-button');
 const cerrarYConfirmarButton = document.getElementById('cerrarYConfirmar');
 // Referencias al Nuevo Botón
 const seguirAgregandoButton = document.getElementById('seguirAgregando'); // ¡AÑADIDO!
+
 
 // ... el resto de tu script ...
 
@@ -208,11 +304,12 @@ function mostrarResumenPedido() {
     resumenModal.style.display = 'block'; // Mostrar el modal
 }
 
-// Lógica para cerrar el Modal
-closeButton.addEventListener('click', () => {
-    resumenModal.style.display = 'none';
-});
 
+//fgdf
+// 🚨 CÓDIGO CORREGIDO: Lógica para CANCELAR el Pedido al presionar la 'x'
+closeButton.addEventListener('click', () => {
+    cancelarPedidoYLimpiar();
+});
 
 //segunda version
 // ...existing code...
@@ -262,41 +359,32 @@ cerrarYConfirmarButton.addEventListener('click', async () => {
 
         const data = await response.json();
 
+         // Dentro del bloque de éxito del fetch:
         if (response.ok && data.success) {
             // Éxito: El backend se encargó de las tablas Pedidos y DetallePedidos.
             alert(`✅ Pedido #${data.idPedido} (Mesa ${idMesa}) guardado con éxito.`);
-            
-            // Limpieza y cierre
-            pedidoActual = []; 
-            document.querySelectorAll('.producto-cantidad').forEach(input => { input.value = 0; });
-            resumenModal.style.display = 'none';
-        } else {
-            alert(`❌ Error al guardar el pedido: ${data.message || 'Error desconocido.'}`);
+            // 🏆 LLAMAMOS A LA LIMPIEZA COMPLETA:
+            cancelarPedidoYLimpiar(); 
+            // Y REEMPLAZAMOS el alert de cancelación por un mensaje de éxito:
+            alert(`✅ Pedido #${data.idPedido} (Mesa ${idMesa}) guardado con éxito.`); 
         }
+
 
     } catch (error) {
         console.error('Error de conexión con el servidor:', error);
         alert('❌ Error de conexión. Asegúrate de que tu servidor (node server.js) esté corriendo.');
     }
 });
-  /*resumenModal.style.display = 'none';
-    alert('Pedido Finalizado y Confirmado.');
-    pedidoActual = []; // Vaciar el pedido
 
-    // Reiniciar los valores de cantidad en todas las tarjetas
-    document.querySelectorAll('.producto-cantidad').forEach(input => {
-        input.value = 0;
-    });
-});*/
 
-// ...existing code...
-
-// Cerrar modal si el usuario hace clic fuera de él
+// 🚨 CÓDIGO CORREGIDO: Cancelar si el usuario hace clic fuera del modal
 window.addEventListener('click', (event) => {
     if (event.target === resumenModal) {
-        resumenModal.style.display = 'none';
+        cancelarPedidoYLimpiar(); // Llama a la función de cancelación
     }
 });
+
+
 // Lógica del nuevo botón "Añadir Más Productos" (¡NUEVO!)
 seguirAgregandoButton.addEventListener('click', () => {
     resumenModal.style.display = 'none';
@@ -309,31 +397,34 @@ seguirAgregandoButton.addEventListener('click', () => {
     const deleteButtons = document.querySelectorAll('.delete');
     const okButtons = document.querySelectorAll('.ok');
 
-       //modificado
-    okButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        // 1. Obtener la tarjeta padre para encontrar los datos
-        const card = btn.closest('.card');
+
+    // Funcionalidad de botones (Ok, Edit, Delete)
+
+// Lógica del botón OK (✔)
+okButtons.forEach(btn => {
+    btn.addEventListener('click', function() { // Usamos 'function' para que 'this' funcione
+        // 1. Obtener la tarjeta padre
+        const card = this.closest('.card'); 
         
-        // 2. Extraer la información usando las clases que añadimos
-        const idProducto= parseInt(card.dataset.id, 10); // Si necesitas el ID
+        // 2. Extraer la información
+        const idProducto = parseInt(card.dataset.id, 10);
         const nombreElement = card.querySelector('.producto-nombre');
         const precioElement = card.querySelector('.producto-precio');
         const cantidadInput = card.querySelector('.producto-cantidad');
 
         // Validación: Asegurarse de que todos los elementos existan
-        if (!nombreElement || !precioElement || !cantidadInput || !idProducto) {
-            alert('Error: Faltan elementos de datos en la tarjeta (nombre/precio/cantidad).');
+        if (!nombreElement || !precioElement || !cantidadInput || isNaN(idProducto)) {
+            alert('Error: Faltan datos en la tarjeta o el ID del producto es inválido.');
             return;
         }
 
         const nombre = nombreElement.textContent.trim();
-        const precioTexto = precioElement.textContent.trim(); // Ej: "Precio: $45"
+        const precioTexto = precioElement.textContent.trim();
         const cantidad = parseInt(cantidadInput.value, 10);
         
         // Validación de cantidad
         if (cantidad < 1 || isNaN(cantidad)) {
-            alert('La cantidad debe ser un número positivo.');
+            alert('La cantidad debe ser un número positivo para añadir un producto.');
             return;
         }
 
@@ -346,22 +437,25 @@ seguirAgregandoButton.addEventListener('click', () => {
         };
 
         // 4. Añadir o actualizar al pedido actual
-        const itemExistente = pedidoActual.find(item => item.nombre === nombre);
+        const itemExistente = pedidoActual.find(item => item.idProducto === idProducto); // Usar ID para mayor precisión
+        
         if (itemExistente) {
             // Si ya existe, SUMAR la cantidad actual (si el usuario la volvió a agregar)
             itemExistente.cantidad += cantidad;
         } else {
-            // Si es un producto nuevo, lo añadimos
+            // Si es un producto nuevo, lo añadimos y DESHABILITAMOS ESTE BOTÓN
             pedidoActual.push(producto);
+            this.disabled = true; 
+            this.style.backgroundColor = '#ccc';
+            this.style.cursor = 'default';
         }
         
-        // 5. Mostrar el modal con el resumen del pedido
+        // 5. Mostrar el modal
         mostrarResumenPedido();
     });
 });
-    //fin modificado
-    //piwas version
-    
+
+     
 
 editButtons.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -395,27 +489,38 @@ editButtons.forEach(btn => {
   });
 });
 
+// REEMPLAZAR tu actual deleteButtons.forEach con este código:
 deleteButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    // 1. Obtener la tarjeta padre
-    const card = btn.closest('.card');
-    const nombreElement = card.querySelector('.producto-nombre');
-    if (!nombreElement) {
-      alert('Error: No se encontró el producto.');
-      return;
-    }
-    const nombre = nombreElement.textContent.trim();
-
-    // 2. Eliminar del array pedidoActual
-    const index = pedidoActual.findIndex(item => item.nombre === nombre);
-    if (index !== -1) {
-      pedidoActual.splice(index, 1); // Elimina el producto del pedido
-      mostrarResumenPedido(); // Actualiza el modal
-      alert('Producto eliminado del resumen.');
-    } else {
-      alert('Este producto no está en el pedido.');
-    }
-  });
+    btn.addEventListener('click', () => {
+        // 1. Obtener la tarjeta padre
+        const card = btn.closest('.card');
+        const nombreElement = card.querySelector('.producto-nombre');
+        
+        if (!nombreElement) {
+          alert('Error: No se encontró el producto.');
+          return;
+        }
+        
+        const nombre = nombreElement.textContent.trim();
+        
+        // 2. Eliminar del array pedidoActual
+        const index = pedidoActual.findIndex(item => item.nombre === nombre);
+        if (index !== -1) {
+            pedidoActual.splice(index, 1); // Elimina el producto del pedido
+            mostrarResumenPedido(); // Actualiza el modal
+            alert('Producto eliminado del resumen.');
+            
+            // 🚨 CLAVE: Re-habilitar el botón OK de la tarjeta eliminada
+            const okButton = card.querySelector('.ok');
+            if (okButton) {
+                okButton.disabled = false;
+                okButton.style.backgroundColor = '';
+                okButton.style.cursor = 'pointer';
+            }
+        } else {
+            alert('Este producto no está en el pedido.');
+        }
+    });
 });
 
   </script>
