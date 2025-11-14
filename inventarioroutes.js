@@ -1,13 +1,13 @@
 // ====================================================================
 // ARCHIVO: inventarioRoutes.js
-// Rutas para la gestión del inventario de la cafetería
+// Rutas SIMPLIFICADAS para la gestión del inventario de la cafetería
 // ====================================================================
 
 module.exports = function(pool) {
   const express = require('express');
   const router = express.Router();
 
-  // 1️⃣ Obtener un producto específico del inventario por ID
+  // 1️⃣ Obtener un producto específico del inventario por ID (SIMPLIFICADO)
   router.get('/producto/:id', async (req, res) => {
     const { id } = req.params;
     
@@ -18,15 +18,7 @@ module.exports = function(pool) {
         SELECT 
           IdInventario,
           NombreProducto,
-          UnidadesSinAbrir,
-          MinUnidades,
-          MaxUnidades,
-          CantidadAbierta,
-          MinCantidad,
-          MaxCantidad,
-          EquivalenciaUnidad,
-          TotalCantidad,
-          UnidadMedida
+          Cantidad
         FROM inventario 
         WHERE IdInventario = ?
       `;
@@ -35,19 +27,6 @@ module.exports = function(pool) {
       
       if (results.length > 0) {
         const producto = results[0];
-        
-        // Si no tiene UnidadMedida definida, determinarla por el nombre
-        if (!producto.UnidadMedida) {
-          const nombreLower = producto.NombreProducto.toLowerCase();
-          
-          if (nombreLower.includes('leche') || nombreLower.includes('agua')) {
-            producto.UnidadMedida = "L";
-          } else if (nombreLower.includes('jarabe') || nombreLower.includes('crema')) {
-            producto.UnidadMedida = "mL";
-          } else {
-            producto.UnidadMedida = "g";
-          }
-        }
         
         console.log(`✅ Producto encontrado: ${producto.NombreProducto}`);
         
@@ -71,56 +50,44 @@ module.exports = function(pool) {
     }
   });
 
-  // 2️⃣ Actualizar un producto del inventario (CORREGIDO - EquivalenciaUnidad)
+  // 2️⃣ Actualizar un producto del inventario (ULTRA-SIMPLIFICADO)
   router.put('/producto/:id', async (req, res) => {
     const { id } = req.params;
-    const { unidades_sin_abrir, cantidad_abierta } = req.body;
+    const { cantidad } = req.body;
     
-    console.log('📥 Recibiendo actualización:', { 
-      id, 
-      unidades_sin_abrir, 
-      cantidad_abierta 
-    });
+    console.log('📥 Recibiendo actualización:', { id, cantidad });
     
     try {
       // Validar que los datos existen
-      if (unidades_sin_abrir === undefined || cantidad_abierta === undefined) {
+      if (cantidad === undefined) {
         console.log('❌ Datos incompletos en la solicitud');
         return res.status(400).json({
           success: false,
-          message: 'Datos incompletos: unidades_sin_abrir y cantidad_abierta son requeridos'
+          message: 'Datos incompletos: cantidad es requerida'
         });
       }
 
-      // Validar tipos de datos
-      const unidades = parseInt(unidades_sin_abrir);
-      const cantidad = parseFloat(cantidad_abierta);
+      // Validar tipo de dato
+      const nuevaCantidad = parseInt(cantidad);
       
-      if (isNaN(unidades) || isNaN(cantidad)) {
-        console.log('❌ Datos inválidos:', { unidades_sin_abrir, cantidad_abierta });
+      if (isNaN(nuevaCantidad)) {
+        console.log('❌ Dato inválido:', { cantidad });
         return res.status(400).json({
           success: false,
-          message: 'Datos inválidos: unidades_sin_abrir debe ser entero y cantidad_abierta debe ser número'
+          message: 'Dato inválido: cantidad debe ser un número entero'
         });
       }
 
-      console.log(`🔄 Actualizando producto ID: ${id} con unidades: ${unidades}, cantidad: ${cantidad}`);
+      console.log(`🔄 Actualizando producto ID: ${id} con cantidad: ${nuevaCantidad}`);
       
-      // SOLO actualizar UnidadesSinAbrir y CantidadAbierta
-      // TotalCantidad se calcula AUTOMÁTICAMENTE por MySQL (columna GENERATED)
+      // SOLO actualizar Cantidad
       const updateQuery = `
         UPDATE inventario 
-        SET UnidadesSinAbrir = ?,
-            CantidadAbierta = ?,
-            FechaActualizacion = CURRENT_TIMESTAMP
+        SET Cantidad = ?
         WHERE IdInventario = ?
       `;
       
-      const [result] = await pool.query(updateQuery, [
-        unidades, 
-        cantidad, 
-        id
-      ]);
+      const [result] = await pool.query(updateQuery, [nuevaCantidad, id]);
       
       if (result.affectedRows === 0) {
         console.log(`❌ No se afectaron filas en la actualización: ${id}`);
@@ -130,16 +97,12 @@ module.exports = function(pool) {
         });
       }
       
-      // Obtener el producto actualizado para devolver el TotalCantidad calculado automáticamente
+      // Obtener el producto actualizado
       const selectQuery = `
         SELECT 
           IdInventario,
           NombreProducto,
-          UnidadesSinAbrir,
-          CantidadAbierta,
-          EquivalenciaUnidad,
-          TotalCantidad,
-          UnidadMedida
+          Cantidad
         FROM inventario 
         WHERE IdInventario = ?
       `;
@@ -157,22 +120,15 @@ module.exports = function(pool) {
       const producto = updatedProduct[0];
       
       console.log(`✅ Producto actualizado correctamente. Filas afectadas: ${result.affectedRows}`);
-      console.log(`📊 Total calculado por MySQL: ${producto.TotalCantidad}`);
       
       res.json({
         success: true,
         message: 'Producto actualizado correctamente',
-        total_cantidad: parseFloat(producto.TotalCantidad),
-        unidades_actualizadas: unidades,
-        cantidad_actualizada: cantidad,
+        cantidad_actualizada: nuevaCantidad,
         producto: {
           id: producto.IdInventario,
           nombre: producto.NombreProducto,
-          unidades_sin_abrir: producto.UnidadesSinAbrir,
-          cantidad_abierta: producto.CantidadAbierta,
-          total_cantidad: parseFloat(producto.TotalCantidad),
-          unidad_medida: producto.UnidadMedida,
-          equivalencia_unidad: producto.EquivalenciaUnidad
+          cantidad: producto.Cantidad
         }
       });
       
@@ -185,7 +141,7 @@ module.exports = function(pool) {
     }
   });
 
-  // 3️⃣ Obtener todos los productos de inventario por categoría
+  // 3️⃣ Obtener todos los productos de inventario por categoría (SIMPLIFICADO)
   router.get('/categoria/:idCategoria', async (req, res) => {
     const { idCategoria } = req.params;
     
@@ -196,16 +152,7 @@ module.exports = function(pool) {
         SELECT 
           i.IdInventario,
           i.NombreProducto,
-          i.UnidadesSinAbrir,
-          i.MinUnidades,
-          i.MaxUnidades,
-          i.CantidadAbierta,
-          i.MinCantidad,
-          i.MaxCantidad,
-          i.EquivalenciaUnidad,
-          i.TotalCantidad,
-          i.UnidadMedida,
-          i.FechaActualizacion,
+          i.Cantidad,
           c.Nombre as Categoria
         FROM inventario i
         JOIN categorias_inventario c ON i.IdCategoriaInventario = c.IdCategoriaInventario
@@ -216,24 +163,7 @@ module.exports = function(pool) {
       const [results] = await pool.query(query, [idCategoria]);
       console.log(`✅ Encontrados ${results.length} productos para categoría ${idCategoria}`);
       
-      // Agregar unidad de medida a cada producto si no la tiene
-      const productosConUnidad = results.map(producto => {
-        if (!producto.UnidadMedida) {
-          const nombreLower = producto.NombreProducto.toLowerCase();
-          
-          if (nombreLower.includes('leche') || nombreLower.includes('agua')) {
-            producto.UnidadMedida = "L";
-          } else if (nombreLower.includes('jarabe') || nombreLower.includes('crema')) {
-            producto.UnidadMedida = "mL";
-          } else {
-            producto.UnidadMedida = "g";
-          }
-        }
-        
-        return producto;
-      });
-      
-      res.json(productosConUnidad);
+      res.json(results);
     } catch (error) {
       console.error('❌ Error al obtener productos por categoría:', error);
       res.status(500).json({ 
@@ -270,51 +200,29 @@ module.exports = function(pool) {
     }
   });
 
-  // 5️⃣ Crear nuevo producto en inventario (CORREGIDO - EquivalenciaUnidad)
+  // 5️⃣ Crear nuevo producto en inventario (SIMPLIFICADO)
   router.post('/producto', async (req, res) => {
     const {
       IdCategoriaInventario,
       NombreProducto,
-      UnidadesSinAbrir,
-      MinUnidades,
-      MaxUnidades,
-      CantidadAbierta,
-      MinCantidad,
-      MaxCantidad,
-      EquivalenciaUnidad,
-      UnidadMedida
+      Cantidad
     } = req.body;
     
     try {
       console.log('➕ Creando nuevo producto:', { NombreProducto, IdCategoriaInventario });
       
-      // NO incluir TotalCantidad en el INSERT - se calcula automáticamente
       const query = `
         INSERT INTO inventario (
           IdCategoriaInventario,
           NombreProducto,
-          UnidadesSinAbrir,
-          MinUnidades,
-          MaxUnidades,
-          CantidadAbierta,
-          MinCantidad,
-          MaxCantidad,
-          EquivalenciaUnidad,
-          UnidadMedida
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          Cantidad
+        ) VALUES (?, ?, ?)
       `;
       
       const [result] = await pool.query(query, [
         IdCategoriaInventario,
         NombreProducto,
-        UnidadesSinAbrir || 0,
-        MinUnidades || 0,
-        MaxUnidades || 0,
-        CantidadAbierta || 0,
-        MinCantidad || 0,
-        MaxCantidad || 0,
-        EquivalenciaUnidad || 0,
-        UnidadMedida || 'g'
+        Cantidad || 0
       ]);
       
       console.log(`✅ Producto creado correctamente. ID: ${result.insertId}`);
