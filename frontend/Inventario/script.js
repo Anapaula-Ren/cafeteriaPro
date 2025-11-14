@@ -1,4 +1,4 @@
-// ==================== CONFIGURACIÓN DE LA API ====================
+// ==================== CONFIGURACIÓN ====================
 const API_URL = 'http://localhost:3000';
 
 // ==================== ELEMENTOS DEL DOM ====================
@@ -7,15 +7,7 @@ const spanCerrar = document.getElementsByClassName('cerrar')[0];
 const btnCancelar = document.querySelector('.btn_cancelar');
 const formModal = document.getElementById('form_modal');
 const inputNombreProducto = document.getElementById('nombre_producto');
-const unidadesInput = document.getElementById('unidades_sin_abrir');
-const gramosAbiertosInput = document.getElementById('gramos_abiertos');
-const totalInput = document.getElementById('total_gramos');
-const pesoUnidadSpan = document.getElementById('peso_unidad');
-const unidadMedidaSpan = document.getElementById('unidad_medida');
-const textoUnidades = document.getElementById('texto_unidades');
-const textoAbierto = document.getElementById('texto_abierto');
-const labelGramosAbiertos = document.querySelector('label[for="gramos_abiertos"]');
-const labelTotal = document.getElementById('label_total');
+const cantidadTotalInput = document.getElementById('cantidad_total');
 const contenedorInventario = document.querySelector('.inventario');
 
 // ==================== ELEMENTOS DEL MODAL ORDENAR ====================
@@ -27,46 +19,29 @@ const ordenProductoNombre = document.getElementById('ordenProductoNombre');
 const ordenDestinoInput = document.getElementById('ordenDestino');
 
 let productoActual = null;
-let configuracionActual = null;
-let idProductoActual = null;
+let productoNombreActual = null;
 
-// ==================== DETERMINAR CATEGORÍA ACTUAL ====================
+// ==================== FUNCIONES PRINCIPALES ====================
+
+// Determinar categoría actual basada en la página
 function obtenerCategoriaActual() {
-    try {
-        const url = window.location.pathname;
-        const nombreArchivo = url.substring(url.lastIndexOf('/') + 1);
-        
-        const mapeoCategorias = {
-            'inventario_bebidas.html': 1,
-            'inventario_comidas.html': 2,
-            'inventario_envases.html': 3,
-            'inventario_limpieza.html': 4,
-            'inventario_menu.html': 1
-        };
-        
-        let categoriaId = mapeoCategorias[nombreArchivo];
-        
-        if (!categoriaId) {
-            const urlParams = new URLSearchParams(window.location.search);
-            categoriaId = urlParams.get('categoria') || 1;
-        }
-        
-        console.log(`📂 Categoría detectada: ${categoriaId}`);
-        return parseInt(categoriaId);
-    } catch (error) {
-        console.error('Error al determinar categoría:', error);
-        return 1;
-    }
+    const url = window.location.pathname;
+    const nombreArchivo = url.substring(url.lastIndexOf('/') + 1);
+    
+    const mapeoCategorias = {
+        'inventario_bebidas.html': 1,  // Bebidas
+        'inventario_comidas.html': 2,  // Comida
+        'inventario_envases.html': 3,  // Envases
+        'inventario_limpieza.html': 4, // Limpieza
+        'inventario_menu.html': 1      // Bebidas por defecto
+    };
+    
+    return mapeoCategorias[nombreArchivo] || 1;
 }
 
-// ==================== CARGAR PRODUCTOS AL INICIO ====================
+// Cargar productos desde la API
 async function cargarProductos() {
     try {
-        if (!contenedorInventario) {
-            console.error('❌ No se encontró el contenedor de inventario');
-            return;
-        }
-
         const categoriaId = obtenerCategoriaActual();
         console.log(`🔍 Cargando productos de categoría ${categoriaId}...`);
         
@@ -79,36 +54,17 @@ async function cargarProductos() {
         const productos = await response.json();
         console.log(`✅ ${productos.length} productos recibidos`);
         
-        if (!Array.isArray(productos)) {
-            throw new Error('Formato de respuesta inválido');
-        }
-        
-        actualizarProductosExistentes(productos);
-        console.log(`✅ Productos actualizados correctamente`);
+        actualizarCantidadesProductos(productos);
         
     } catch (error) {
         console.error('❌ Error al cargar productos:', error);
-        // Solo mostrar error si no hay productos en el HTML
-        if (document.querySelectorAll('.producto').length === 0) {
-            contenedorInventario.innerHTML = `
-                <div class="error-carga">
-                    <h3>Error al cargar el inventario</h3>
-                    <p>${error.message}</p>
-                    <button onclick="cargarProductos()">Reintentar</button>
-                </div>
-            `;
-        }
+        mostrarErrorCarga(error);
     }
 }
 
-// ==================== ACTUALIZAR PRODUCTOS EXISTENTES ====================
-function actualizarProductosExistentes(productos) {
+// Actualizar cantidades de productos existentes
+function actualizarCantidadesProductos(productos) {
     const productosExistentes = document.querySelectorAll('.producto');
-    
-    if (productosExistentes.length === 0) {
-        crearProductosDesdeCero(productos);
-        return;
-    }
     
     productosExistentes.forEach(productoElement => {
         const nombreProducto = productoElement.querySelector('.nombre_del_producto')?.textContent?.trim();
@@ -118,121 +74,35 @@ function actualizarProductosExistentes(productos) {
         const productoBD = productos.find(p => p.NombreProducto?.trim() === nombreProducto);
         
         if (productoBD) {
-            // Actualizar solo la cantidad y data-id
             const inputCantidad = productoElement.querySelector('.cantidad_producto');
             if (inputCantidad) {
-                inputCantidad.value = parseFloat(productoBD.TotalCantidad) || 0;
+                inputCantidad.value = parseInt(productoBD.Cantidad) || 0;
             }
-            
-            productoElement.setAttribute('data-id', productoBD.IdInventario);
-            
-        } else {
-            console.warn(`⚠️ "${nombreProducto}" no encontrado en BD`);
         }
     });
     
-    // Agregar event listeners después de actualizar
     agregarEventListeners();
 }
 
-// ==================== CREAR PRODUCTOS DESDE CERO ====================
-function crearProductosDesdeCero(productos) {
-    contenedorInventario.innerHTML = '';
-    
-    productos.forEach(producto => {
-        if (!producto.NombreProducto) return;
+// Obtener ID del producto por nombre
+async function obtenerIdProducto(nombreProducto) {
+    try {
+        const categoriaId = obtenerCategoriaActual();
+        const response = await fetch(`${API_URL}/api/inventario/categoria/${categoriaId}`);
+        const productos = await response.json();
         
-        const divProducto = document.createElement('div');
-        divProducto.className = 'producto';
-        divProducto.setAttribute('data-id', producto.IdInventario);
+        const producto = productos.find(p => 
+            p.NombreProducto?.trim().toLowerCase() === nombreProducto.trim().toLowerCase()
+        );
         
-        const unidadTexto = producto.UnidadMedida || 'g';
-        const maxTexto = producto.MaxCantidad || 5000;
-        const cantidadActual = parseFloat(producto.TotalCantidad) || 0;
-        const nombreImagen = obtenerNombreImagen(producto.NombreProducto);
-        
-        divProducto.innerHTML = `
-            <h3 class="nombre_del_producto">${producto.NombreProducto}</h3>
-            <img src="imagenes/${nombreImagen}" alt="${producto.NombreProducto}" 
-                 onerror="this.src='imagenes/default.jpg'">
-            <p>Cantidad: <input type="number" value="${cantidadActual}" readonly class="cantidad_producto"> ${unidadTexto} / ${maxTexto} ${unidadTexto}</p>
-            <div class="botones">
-                <button class="btn_editar"><i class="fa-solid fa-pencil"></i></button>
-                <button class="btn_ordenar"><i class="fa-solid fa-plus"></i></button>
-            </div>
-        `;
-        
-        contenedorInventario.appendChild(divProducto);
-    });
-    
-    agregarEventListeners();
-}
-
-// ==================== FUNCIÓN PARA OBTENER NOMBRE DE IMAGEN ====================
-function obtenerNombreImagen(nombreProducto) {
-    const mapeoGeneral = {
-        // BEBIDAS
-        'Café molido': 'cafe_molido.jpeg',
-        'Leche entera': 'leche_entera.jpg',
-        'Leche deslactosada': 'leche_deslactosada.jpg',
-        'Leche de almendras': 'leche_almendra.jpg',
-        'Azúcar estándar': 'azucar_estandar.jpg',
-        'Stevia': 'stevia.jpeg',
-        'Jarabe de vainilla': 'jarabe_vainilla.jpg',
-        'Jarabe de chocolate': 'jarabe_chocolate.jpg',
-        'Té negro': 'te_negro.jpg',
-        'Agua': 'agua.jpg',
-        'Crema para batir': 'crema_para_batir.jpg',
-        'Canela molida': 'canela_molida.jpg',
-        
-        // COMIDAS
-        'Sandwich de jamón y queso': 'sandwich_jamon_queso.jpg',
-        'Wrap de pollo': 'wrap_pollo.jpg',
-        'Croissant': 'croissant.jpg',
-        'Muffin': 'muffin.jpg',
-        'Brownie': 'brownie.jpg',
-        'Dona': 'dona.jpg',
-        
-        // ENVASES
-        'Bebida caliente': 'vaso_caliente.jpg',
-        'Bebida fría': 'vaso_frio.jpg',
-        'Servilletas': 'servilletas.jpg',
-        'Manga aislante': 'manga_aislante.jpg',
-        'Popotes': 'popotes.jpg',
-        
-        // LIMPIEZA
-        'Bolsa de basura': 'bolsa_basura.jpg',
-        'Esponja': 'esponja.jpg',
-        'Desinfectante': 'desinfectante.jpg',
-        'Microfibra': 'microfibra.jpg'
-    };
-    
-    return mapeoGeneral[nombreProducto] || 'default.jpg';
-}
-
-// ==================== FUNCIÓN PARA CALCULAR TOTAL ====================
-function calcularTotal() {
-    if (!configuracionActual) return;
-
-    const unidades = parseFloat(unidadesInput.value) || 0;
-    const cantidadAbierta = parseFloat(gramosAbiertosInput.value) || 0;
-    const pesoUnidad = parseFloat(pesoUnidadSpan.textContent) || 0;
-    
-    const total = (unidades * pesoUnidad) + cantidadAbierta;
-    
-    let unidadTexto = "unidades";
-    if (configuracionActual.unidadMedida === "g") {
-        unidadTexto = "gramos";
-    } else if (configuracionActual.unidadMedida === "L") {
-        unidadTexto = "litros";
-    } else if (configuracionActual.unidadMedida === "mL") {
-        unidadTexto = "mililitros";
+        return producto ? producto.IdInventario : null;
+    } catch (error) {
+        console.error('Error al obtener ID del producto:', error);
+        return null;
     }
-    
-    totalInput.value = `${total.toFixed(2)} ${unidadTexto}`;
 }
 
-// ==================== FUNCIÓN PARA OBTENER CONFIGURACIÓN DESDE BD ====================
+// Obtener configuración del producto
 async function obtenerConfiguracionProducto(idProducto) {
     try {
         const response = await fetch(`${API_URL}/api/inventario/producto/${idProducto}`);
@@ -247,72 +117,111 @@ async function obtenerConfiguracionProducto(idProducto) {
             return {
                 id: data.producto.IdInventario,
                 nombre: data.producto.NombreProducto,
-                unidadMedida: data.producto.UnidadMedida || "g",
-                pesoUnidad: parseFloat(data.producto.EquivalenciaUnidad) || 0,
-                minUnidades: parseInt(data.producto.MinUnidades) || 0,
-                maxUnidades: parseInt(data.producto.MaxUnidades) || 0,
-                minAbierto: parseFloat(data.producto.MinCantidad) || 0,
-                maxAbierto: parseFloat(data.producto.MaxCantidad) || 0,
-                unidadesSinAbrir: parseInt(data.producto.UnidadesSinAbrir) || 0,
-                cantidadAbierta: parseFloat(data.producto.CantidadAbierta) || 0
+                cantidadActual: parseInt(data.producto.Cantidad) || 0
             };
         } else {
             throw new Error(data.message);
         }
     } catch (error) {
-        console.error('Error al obtener configuración:', error);
+        console.error('❌ Error al obtener configuración:', error);
         alert('Error al cargar los datos del producto');
         return null;
     }
 }
 
-// ==================== FUNCIÓN PARA ABRIR EL MODAL EDITAR ====================
-async function abrirModal(idProducto) {
+// Abrir modal para editar
+async function abrirModal(nombreProducto) {
     try {
+        console.log(`📝 Abriendo modal para producto: ${nombreProducto}`);
+        
+        // Obtener ID del producto por nombre
+        const idProducto = await obtenerIdProducto(nombreProducto);
+        
+        if (!idProducto) {
+            alert('Error: No se encontró el producto en la base de datos');
+            return;
+        }
+        
         const config = await obtenerConfiguracionProducto(idProducto);
         
-        if (!config) return;
+        if (!config) {
+            alert('No se pudieron cargar los datos del producto');
+            return;
+        }
         
-        configuracionActual = config;
-        idProductoActual = idProducto;
+        productoNombreActual = nombreProducto;
         
         // Configurar modal
         inputNombreProducto.value = config.nombre;
+        cantidadTotalInput.value = config.cantidadActual;
         
-        let textoUnidadAbierta = "gramos";
-        if (config.unidadMedida === "L") {
-            textoUnidadAbierta = "litros";
-        } else if (config.unidadMedida === "mL") {
-            textoUnidadAbierta = "mililitros";
-        }
-        
-        labelGramosAbiertos.innerHTML = `Cantidad en ${textoUnidadAbierta} (abierto):`;
-        labelTotal.textContent = `Total en ${textoUnidadAbierta}:`;
-        pesoUnidadSpan.textContent = config.pesoUnidad;
-        unidadMedidaSpan.textContent = config.unidadMedida;
-        
-        unidadesInput.min = config.minUnidades;
-        unidadesInput.max = config.maxUnidades;
-        gramosAbiertosInput.min = config.minAbierto;
-        gramosAbiertosInput.max = config.maxAbierto;
-        
-        textoUnidades.textContent = `Mínimo: ${config.minUnidades} | Máximo: ${config.maxUnidades}`;
-        textoAbierto.textContent = `Mínimo: ${config.minAbierto} ${config.unidadMedida} | Máximo: ${config.maxAbierto} ${config.unidadMedida}`;
-        
-        unidadesInput.value = config.unidadesSinAbrir;
-        gramosAbiertosInput.value = config.cantidadAbierta;
-        
-        calcularTotal();
+        // Enfocar el input de cantidad
+        setTimeout(() => {
+            cantidadTotalInput.focus();
+            cantidadTotalInput.select();
+        }, 100);
         
         modal.style.display = 'flex';
         
     } catch (error) {
-        console.error('Error al abrir modal:', error);
-        alert('Error al abrir el editor');
+        console.error('❌ Error al abrir modal:', error);
+        alert('Error al abrir el editor: ' + error.message);
     }
 }
 
-// ==================== FUNCIÓN PARA ABRIR EL MODAL ORDENAR ====================
+// Actualizar producto en la base de datos
+async function actualizarProducto(nombreProducto, nuevaCantidad) {
+    try {
+        console.log(`🔄 Actualizando producto: ${nombreProducto} a cantidad: ${nuevaCantidad}`);
+        
+        // Obtener ID del producto
+        const idProducto = await obtenerIdProducto(nombreProducto);
+        
+        if (!idProducto) {
+            alert('Error: No se encontró el producto en la base de datos');
+            return;
+        }
+        
+        const response = await fetch(`${API_URL}/api/inventario/producto/${idProducto}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                cantidad: nuevaCantidad
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('✅ Producto actualizado correctamente');
+            
+            // Actualizar la cantidad en el DOM
+            if (productoActual) {
+                const inputCantidad = productoActual.querySelector('.cantidad_producto');
+                if (inputCantidad) {
+                    inputCantidad.value = nuevaCantidad;
+                }
+            }
+            
+            // Cerrar modal y mostrar éxito
+            cerrarModal();
+            alert('¡Inventario actualizado correctamente!');
+            
+        } else {
+            throw new Error(data.message || 'Error al actualizar el producto');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error al actualizar producto:', error);
+        alert('Error al actualizar el producto: ' + error.message);
+    }
+}
+
+// ==================== FUNCIONES PARA CORREOS ====================
+
+// Función para Abrir el Modal de Ordenar
 function abrirModalOrdenar(nombreProducto) {
     if (productoTitulo && ordenProductoNombre) {
         productoTitulo.textContent = nombreProducto;
@@ -325,28 +234,66 @@ function abrirModalOrdenar(nombreProducto) {
     }
 }
 
+// Envío de orden por correo
+async function enviarOrdenCorreo(orderData) {
+    try {
+        console.log('📧 Enviando orden:', orderData);
+
+        const response = await fetch(`${API_URL}/api/ordenar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            alert(`✅ ${data.message}`);
+            ordenModal.style.display = 'none';
+        } else {
+            alert(`❌ Error al enviar orden: ${data.message || 'Error de servidor desconocido'}`);
+        }
+
+    } catch (error) {
+        console.error('Error de conexión con la API de Correo:', error);
+        alert('❌ Error de conexión. Verifique el servidor Node.js.');
+    }
+}
+
+// Cerrar modal
+function cerrarModal() {
+    modal.style.display = 'none';
+    productoNombreActual = null;
+    productoActual = null;
+    formModal.reset();
+}
+
+// Cerrar modal ordenar
+function cerrarModalOrdenar() {
+    ordenModal.style.display = 'none';
+}
+
 // ==================== EVENT LISTENERS ====================
+
 function agregarEventListeners() {
-    // Event listeners para inputs del modal editar
-    if (unidadesInput) unidadesInput.addEventListener('input', calcularTotal);
-    if (gramosAbiertosInput) gramosAbiertosInput.addEventListener('input', calcularTotal);
+    console.log('🔗 Configurando event listeners...');
     
-    // Event listeners para botones editar
+    // Botones editar
     const botonesEditar = document.querySelectorAll('.btn_editar');
-    botonesEditar.forEach(boton => {
+    botonesEditar.forEach((boton) => {
         boton.onclick = function() {
             productoActual = this.closest('.producto');
-            const idProducto = productoActual.getAttribute('data-id');
+            const nombreProducto = productoActual.querySelector('.nombre_del_producto')?.textContent?.trim();
             
-            if (idProducto) {
-                abrirModal(idProducto);
+            if (nombreProducto) {
+                abrirModal(nombreProducto);
             } else {
-                alert('Error: No se encontró el ID del producto');
+                alert('Error: No se pudo obtener el nombre del producto');
             }
         };
     });
     
-    // Event listeners para botones ordenar
+    // Botones ordenar
     const botonesOrdenar = document.querySelectorAll('.btn_ordenar');
     botonesOrdenar.forEach(boton => {
         boton.onclick = function() {
@@ -362,177 +309,87 @@ function agregarEventListeners() {
     });
 }
 
-// ==================== EVENTOS DEL MODAL EDITAR ====================
-if (spanCerrar) {
-    spanCerrar.onclick = function() {
-        modal.style.display = 'none';
+// Event listeners del modal editar
+formModal.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    if (!productoNombreActual) {
+        alert('Error: No hay un producto seleccionado');
+        return;
     }
-}
 
-if (btnCancelar) {
-    btnCancelar.onclick = function() {
-        modal.style.display = 'none';
+    const nuevaCantidad = parseInt(cantidadTotalInput.value);
+    
+    if (isNaN(nuevaCantidad) || nuevaCantidad < 0) {
+        alert('Por favor ingrese una cantidad válida (número entero positivo)');
+        return;
     }
-}
 
-if (modal) {
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
-        }
-    }
-}
+    await actualizarProducto(productoNombreActual, nuevaCantidad);
+});
 
-// ==================== EVENTOS DEL MODAL ORDENAR ====================
-if (closeButton) {
-    closeButton.onclick = function() {
-        ordenModal.style.display = 'none';
-    }
-}
+// Event listeners del modal ordenar
+if (ordenForm) {
+    ordenForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-if (ordenModal) {
-    window.addEventListener('click', function(event) {
-        if (event.target == ordenModal) {
-            ordenModal.style.display = 'none';
-        }
+        const producto = ordenProductoNombre.value;
+        const cantidad = document.getElementById('ordenCantidad').value;
+        const motivo = document.getElementById('ordenMotivo').value;
+        const destino = ordenDestinoInput.value;
+        const usuarioNombre = localStorage.getItem('usuarioNombre') || 'Usuario Cafetería';
+
+        const orderData = {
+            producto,
+            cantidad: parseInt(cantidad, 10),
+            motivo,
+            destino,
+            usuarioNombre 
+        };
+
+        await enviarOrdenCorreo(orderData);
     });
 }
 
-// ==================== GUARDAR CAMBIOS (EDITAR) ====================
-if (formModal) {
-    formModal.onsubmit = async function(e) {
-        e.preventDefault();
-        
-        try {
-            if (!configuracionActual || !idProductoActual) {
-                alert('Error: No hay producto seleccionado');
-                return;
-            }
-            
-            const unidades = parseFloat(unidadesInput.value) || 0;
-            const cantidadAbierta = parseFloat(gramosAbiertosInput.value) || 0;
-            
-            // Validaciones
-            if (unidades < configuracionActual.minUnidades) {
-                alert(`Las unidades no pueden ser menores a ${configuracionActual.minUnidades}`);
-                return;
-            }
-            
-            if (unidades > configuracionActual.maxUnidades) {
-                alert(`Las unidades no pueden ser mayores a ${configuracionActual.maxUnidades}`);
-                return;
-            }
-            
-            if (cantidadAbierta < configuracionActual.minAbierto) {
-                alert(`La cantidad abierta no puede ser menor a ${configuracionActual.minAbierto}`);
-                return;
-            }
-            
-            if (cantidadAbierta > configuracionActual.maxAbierto) {
-                alert(`La cantidad abierta no puede ser mayor a ${configuracionActual.maxAbierto}`);
-                return;
-            }
-            
-            console.log('Enviando datos:', { unidades_sin_abrir: unidades, cantidad_abierta: cantidadAbierta });
-            
-            const response = await fetch(`${API_URL}/api/inventario/producto/${idProductoActual}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    unidades_sin_abrir: unidades,
-                    cantidad_abierta: cantidadAbierta
-                })
-            });
-            
-            const result = await response.json();
-            if (result.success) {
-                // Actualizar el valor en el DOM inmediatamente
-                if (productoActual) {
-                    const inputCantidad = productoActual.querySelector('.cantidad_producto');
-                    if (inputCantidad) {
-                        inputCantidad.value = parseFloat(result.total_cantidad).toFixed(2);
-                    }
-                }
-                
-                modal.style.display = 'none';
-                alert('✅ Cantidad actualizada correctamente');
-                
-            } else {
-                alert('❌ Error: ' + result.message);
-            }
-            
-        } catch (error) {
-            console.error('Error al guardar:', error);
-            alert('❌ Error al guardar los cambios');
-        }
-    };
-}
+// Cerrar modales
+spanCerrar?.addEventListener('click', cerrarModal);
+btnCancelar?.addEventListener('click', cerrarModal);
+closeButton?.addEventListener('click', cerrarModalOrdenar);
 
-// ==================== ENVÍO DE ORDEN POR CORREO ====================
-if (ordenForm) {
-    ordenForm.onsubmit = async function(e) {
-        e.preventDefault();
+window.addEventListener('click', function(event) {
+    if (event.target === modal) {
+        cerrarModal();
+    }
+    if (event.target === ordenModal) {
+        cerrarModalOrdenar();
+    }
+});
 
-        try {
-            const producto = ordenProductoNombre.value;
-            const cantidad = document.getElementById('ordenCantidad').value;
-            const motivo = document.getElementById('ordenMotivo').value;
-            const destino = ordenDestinoInput.value;
-            const usuarioNombre = localStorage.getItem('usuarioNombre') || 'Usuario Cafetería';
+// ==================== FUNCIONES AUXILIARES ====================
 
-            const orderData = {
-                producto,
-                cantidad: parseInt(cantidad, 10),
-                motivo,
-                destino,
-                usuarioNombre 
-            };
-
-            console.log('📧 Enviando orden:', orderData);
-
-            const response = await fetch(`${API_URL}/api/ordenar`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData)
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                alert(`✅ ${data.message}`);
-                ordenModal.style.display = 'none';
-            } else {
-                alert(`❌ Error al enviar orden: ${data.message || 'Error de servidor desconocido'}`);
-            }
-
-        } catch (error) {
-            console.error('Error de conexión con la API de Correo:', error);
-            alert('❌ Error de conexión. Verifique el servidor Node.js.');
-        }
-    };
+// Mostrar error de carga
+function mostrarErrorCarga(error) {
+    if (document.querySelectorAll('.producto').length === 0) {
+        contenedorInventario.innerHTML = `
+            <div class="error-carga">
+                <h3>Error al cargar el inventario</h3>
+                <p>${error.message}</p>
+                <button onclick="cargarProductos()">Reintentar</button>
+            </div>
+        `;
+    }
 }
 
 // ==================== INICIALIZACIÓN ====================
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Inicializando sistema de inventario...');
     
-    if (contenedorInventario) {
-        // Esperar a que las imágenes del HTML se carguen
-        setTimeout(cargarProductos, 100);
-    }
-    
-    // Configurar event listeners globales
-    agregarEventListeners();
+    // Cargar productos después de que el DOM esté listo
+    setTimeout(() => {
+        cargarProductos();
+    }, 100);
 });
-
-
-
-
-
-
-
 
 
 
