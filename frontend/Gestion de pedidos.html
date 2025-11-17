@@ -359,15 +359,35 @@ cerrarYConfirmarButton.addEventListener('click', async () => {
 
         const data = await response.json();
 
-         // Dentro del bloque de éxito del fetch:
+
+        // REEMPLAZA EL BLOQUE DE ÉXITO ACTUAL (Línea ~198) con este código:
         if (response.ok && data.success) {
+            // 1. Mensaje ÚNICO de Éxito
+            alert(`✅ Pedido #${data.idPedido} (Mesa ${idMesa}) guardado con éxito.`);
+            
+            // 2. Limpieza de Interfaz (sin alert de cancelación)
+            pedidoActual = []; 
+            document.querySelectorAll('.producto-cantidad').forEach(input => { input.value = 0; });
+            document.querySelectorAll('.ok').forEach(button => { // ⬅️ Habilitar botones aquí
+                button.disabled = false;
+                button.style.backgroundColor = '';
+                button.style.cursor = 'pointer';
+            });
+            resumenModal.style.display = 'none';
+
+        } else {
+            // Manejo del error si el backend falló (ej: stock insuficiente)
+            alert(`❌ Error al guardar el pedido: ${data.message || 'Error desconocido.'}`);
+        }
+                // Dentro del bloque de éxito del fetch:
+        /*if (response.ok && data.success) {
             // Éxito: El backend se encargó de las tablas Pedidos y DetallePedidos.
             alert(`✅ Pedido #${data.idPedido} (Mesa ${idMesa}) guardado con éxito.`);
             // 🏆 LLAMAMOS A LA LIMPIEZA COMPLETA:
             cancelarPedidoYLimpiar(); 
             // Y REEMPLAZAMOS el alert de cancelación por un mensaje de éxito:
             alert(`✅ Pedido #${data.idPedido} (Mesa ${idMesa}) guardado con éxito.`); 
-        }
+        }*/
 
 
     } catch (error) {

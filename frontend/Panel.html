@@ -31,6 +31,7 @@
                     <div>Mesa</div>
                     <div>Fecha</div>
                     <div>Total</div>
+                    <div>Estado</div>
                 </div>
                 <div id="orderList">
                     <p>Cargando pedidos...</p>
@@ -89,6 +90,7 @@
                     <div>${order.NombreCliente}</div>
                     <div>${formatDate(order.Fecha)}</div>
                     <div>$${parseFloat(order.Total).toFixed(2)}</div>
+                    <div class="order-status">${order.Estado}</div>;
                 `;
                 
                 // 2. AÑADE EL EVENTO CLICK
@@ -107,7 +109,90 @@
     }
 
     // 3. CARGA LOS DETALLES DEL PEDIDO EN LA COLUMNA DERECHA
-    async function showOrderDetail(orderId, orderSummary) {
+async function showOrderDetail(orderId, orderSummary) {
+    orderDetailContent.innerHTML = '<p>Cargando detalles...</p>';
+    
+    // Obtenemos la referencia a la fila actual para actualizar su estado visual
+    const activeRow = document.querySelector(`.order-row[data-id="${orderId}"]`);
+
+    try {
+        // Llamar a la nueva ruta para obtener el detalle de productos
+        const response = await fetch(`http://localhost:3000/api/pedidos/${orderId}/detalle`);
+        if (!response.ok) {
+            throw new Error('Error al cargar detalles');
+        }
+        const details = await response.json();
+
+        // 1. Iniciar la estructura HTML
+        let detailsHTML = `
+            <h4>Pedido #${orderId}</h4>
+            
+            <p><strong>Mesa:</strong> ${orderSummary.NombreCliente}</p>
+            <p><strong>Estado:</strong> <span id="currentStatus">${orderSummary.Estado}</span></p>
+            <p><strong>Tomado por:</strong> ${orderSummary.NombreUsuario}</p>
+            <hr>
+            
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cant.</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        // 2. Insertar las filas de productos (detalles)
+        details.forEach(item => {
+            detailsHTML += `
+                <tr>
+                    <td>${item.NombreProducto}</td>
+                    <td>x${item.Cantidad}</td>
+                    <td>$${parseFloat(item.Subtotal).toFixed(2)}</td>
+                </tr>
+            `;
+        });
+        
+        // 3. Cerrar la tabla y añadir totales
+        detailsHTML += `
+                </tbody>
+            </table>
+            <hr>
+            <p style="font-size: 1.2em; font-weight: bold; text-align: right;">TOTAL: $${parseFloat(orderSummary.Total).toFixed(2)}</p>
+        `;
+
+        // 4. Añadir el botón "Completado" basado en el estado (Si el estado es 'Pendiente')
+        if (orderSummary.Estado === 'Pendiente') {
+            detailsHTML += `
+                <button id="completeOrderBtn" 
+                        data-order-id="${orderId}"
+                        style="background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%;">
+                    PEDIDO COMPLETADO
+                </button>
+            `;
+        } else {
+            detailsHTML += `<p style="color: green; font-weight: bold; margin-top: 15px;">✅ Pedido Finalizado.</p>`;
+        }
+
+        // 5. Inyectar todo el HTML y adjuntar el evento
+        orderDetailContent.innerHTML = detailsHTML;
+
+        const completeBtn = document.getElementById('completeOrderBtn');
+        if (completeBtn) {
+            completeBtn.addEventListener('click', () => {
+                if (confirm(`¿Estás seguro de que el Pedido #${orderId} fue entregado y debe ser marcado como COMPLETADO?`)) {
+                    markOrderAsCompleted(orderId, activeRow); // Pasar la referencia de la fila
+                }
+            });
+        }
+
+    } catch (error) {
+        orderDetailContent.innerHTML = `<p style="color: red;">Error al obtener detalles: ${error.message}</p>`;
+    }
+}
+    // 3. CARGA LOS DETALLES DEL PEDIDO EN LA COLUMNA DERECHA
+    /*async function showOrderDetail(orderId, orderSummary) {
         orderDetailContent.innerHTML = '<p>Cargando detalles...</p>';
         try {
             // Llamar a la nueva ruta para obtener el detalle de productos
@@ -121,6 +206,7 @@
               <h4>Pedido #${orderId}</h4>
         
                 <p><strong>Mesa:</strong> ${orderSummary.NombreCliente}</p>
+                <p><strong>Estado:</strong> <span id="currentStatus">${orderSummary.Estado}</span></p>
                 <p><strong>Tomado por:</strong> ${orderSummary.NombreUsuario}</p>
                 <hr>
                 <table class="detail-table">
@@ -132,6 +218,15 @@
                         </tr>
                     </thead>
                     <tbody>
+                
+        
+        ${orderSummary.Estado === 'Pendiente' ? `
+            <button id="completeOrderBtn" 
+                    data-order-id="${orderId}"
+                    style="background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px; width: 100%;">
+                PEDIDO COMPLETADO
+            </button>
+        ` : `<p style="color: green; font-weight: bold;">✅ Pedido Finalizado.</p>`}
             `;
 
             details.forEach(item => {
@@ -153,10 +248,82 @@
 
             orderDetailContent.innerHTML = detailsHTML;
 
-        } catch (error) {
-            orderDetailContent.innerHTML = `<p style="color: red;">Error al obtener detalles: ${error.message}</p>`;
+            // 🚨 Adjuntar evento SOLO si el botón existe (si el estado es 'Pendiente')
+            const completeBtn = document.getElementById('completeOrderBtn');
+            if (completeBtn) {
+                completeBtn.addEventListener('click', () => {
+                    if (confirm(`¿Estás seguro de que el Pedido #${orderId} fue entregado y debe ser marcado como COMPLETADO?`)) {
+                        markOrderAsCompleted(orderId);
+                    }
+                    });
+            }
+
+                } catch (error) {
+                    orderDetailContent.innerHTML = `<p style="color: red;">Error al obtener detalles: ${error.message}</p>`;
+                }
+
+    }*/
+
+
+    // NUEVA FUNCIÓN: Llama a la API para cambiar el estado y actualiza el frontend
+// 🚨 ACEPTA EL ELEMENTO DE LA FILA COMO PARÁMETRO
+async function markOrderAsCompleted(orderId, rowElement) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/pedidos/${orderId}/completar`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            throw new Error('Fallo la actualización en el servidor.');
         }
+
+        // 1. Ocultar la fila de la lista izquierda
+        if (rowElement) {
+            rowElement.style.display = 'none'; // Oculta la fila que se pasó como argumento
+        }
+        
+        // 2. Limpiar el panel de detalles de la derecha
+        orderDetailContent.innerHTML = '<p style="color: green; font-weight: bold;">Orden completada y archivada.</p>';
+        
+        alert(`🎉 Pedido #${orderId} marcado como COMPLETADO.`);
+
+        // Opcional: Recargar la lista para asegurar la consistencia (aunque el display:none es suficiente)
+        // loadOrderList(); 
+
+    } catch (error) {
+        alert(`Error: No se pudo completar el pedido. ${error.message}`);
+        console.error('Error PUT:', error);
     }
+}
+    // NUEVA FUNCIÓN: Llama a la API para cambiar el estado y actualiza el frontend
+/*async function markOrderAsCompleted(orderId) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/pedidos/${orderId}/completar`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            throw new Error('Fallo la actualización en el servidor.');
+        }
+
+        // 1. Ocultar la fila de la lista izquierda
+        const rowToHide = document.querySelector(`.order-row[data-id="${orderId}"]`);
+        if (rowToHide) {
+            rowToHide.style.display = 'none'; // Oculta la fila
+        }
+        
+        // 2. Limpiar el panel de detalles de la derecha
+        orderDetailContent.innerHTML = '<p style="color: green; font-weight: bold;">Orden completada y archivada.</p>';
+        
+        alert(`🎉 Pedido #${orderId} marcado como COMPLETADO.`);
+
+    } catch (error) {
+        alert(`Error: No se pudo completar el pedido. ${error.message}`);
+        console.error('Error PUT:', error);
+    }
+}*/
 
     loadOrderList();
 });

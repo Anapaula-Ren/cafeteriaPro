@@ -78,22 +78,7 @@ app.post('/api/login', async (req, res) => {
                 }
             });
 // ...
-    /*const { email, password } = req.body; 
-    try {
-        const [users] = await pool.query(
-            'SELECT * FROM Usuarios WHERE Email = ? AND Password = ?',
-            [email, password] // En producción, usar hash para contraseñas
-        );
-
-        if (users.length > 0) {
-            res.json({ 
-                success: true, 
-                user: {
-                    id: users[0].IdUsuario,
-                    email: users[0].Email,
-                    role: users[0].Rol
-                }
-            });*/
+    
         } else {
             res.status(401).json({ success: false, message: 'Credenciales inválidas' });
         }
@@ -178,6 +163,27 @@ app.post('/api/inventario/productos', async (req, res) => {
   }
 });
 
+
+// RUTA PARA MARCAR PEDIDO COMO COMPLETADO
+app.put('/api/pedidos/:id/completar', async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        const query = 'UPDATE Pedidos SET Estado = "Completado" WHERE IdPedido = ?';
+        const [result] = await pool.query(query, [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Pedido no encontrado.' });
+        }
+        
+        res.json({ success: true, message: 'Estado del pedido actualizado a Completado.' });
+
+    } catch (error) {
+        console.error('Error al completar pedido:', error);
+        res.status(500).json({ success: false, message: 'Error interno al actualizar el estado.' });
+    }
+});
+
 // get oedido o algo asi nose pal papnel
 // --- RUTAS DE PEDIDOS PARA EL PANEL DE VISUALIZACIÓN ---
 
@@ -191,10 +197,12 @@ app.get('/api/pedidos', async (req, res) => {
                 c.Nombre AS NombreCliente,  -- Nombre de la mesa/cliente
                 p.Fecha,
                 p.Total,
-                u.Nombre AS NombreUsuario   -- Nombre del empleado
+                u.Nombre AS NombreUsuario,   -- Nombre del empleado
+                p.Estado
             FROM Pedidos p
             JOIN Clientes c ON p.IdCliente = c.IdCliente
             JOIN Usuarios u ON p.IdUsuario = u.IdUsuario
+            WHERE P.Estado = 'Pendiente'
             ORDER BY p.Fecha DESC;
         `;
         
@@ -207,7 +215,7 @@ app.get('/api/pedidos', async (req, res) => {
 });
 
 // Ruta 2: Para obtener el detalle de un pedido específico (Panel, ticket derecho)
-// Se asume que la tabla de detalles se llama DetallePedidos (sin guion bajo)
+
 app.get('/api/pedidos/:id/detalle', async (req, res) => {
     const { id } = req.params;
     try {
@@ -230,23 +238,6 @@ app.get('/api/pedidos/:id/detalle', async (req, res) => {
     }
 });
 
-// Ruta que ya tenías para actualizar stock, la mantenemos aquí para no borrarla
-// Actualizar stock de un producto
-/*app.put('/api/inventario/productos/:id', async (req, res) => {
-    const { id } = req.params;
-    const { stock } = req.body;
-    
-    try {
-        await pool.query(
-            'UPDATE Productos SET Stock = ? WHERE IdProducto = ?',
-            [stock, id]
-        );
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Error al actualizar stock:', error);
-        res.status(500).json({ error: 'Error al actualizar stock' });
-    }
-});*/
 
 
 // RUTAS PARA INSERTAR DATOS (POST)
@@ -263,7 +254,7 @@ app.post('/api/pedidos', async (req, res) => {
         await connection.beginTransaction();
 
         // 2. Insertar en la tabla PEDIDOS (IdCliente, Total, IdUsuario, Estado)
-        const pedidoQuery = 'INSERT INTO Pedidos (IdCliente, Total, IdUsuario) VALUES (?, ?, ?)';
+        const pedidoQuery = 'INSERT INTO Pedidos (IdCliente, Total, IdUsuario, Estado) VALUES (?, ?, ?, "Pendiente")';
         const [pedidoResult] = await connection.query(pedidoQuery, [idCliente, total, idUsuario]);
         const idPedido = pedidoResult.insertId;
 
@@ -349,129 +340,7 @@ app.post('/api/ordenar', async (req, res) => {
     }
 });
 
-/*app.post('/api/pedidos', async (req, res) => {
-    const { productos, total, idUsuario } = req.body;
 
-    let connection;*/
-  /*app.post('/api/pedidos', async (req, res) => {
-    // 🚨 MODIFICACIÓN 1: Añadimos 'idCliente' para recibir el número de mesa
-    const { idCliente, total, idUsuario, productos } = req.body; 
-
-    let connection;
-    try {
-        connection = await pool.getConnection();
-        await connection.beginTransaction();
-
-        // 2. Insertar en la tabla PEDIDOS (Incluyendo IdCliente)
-        // 🚨 MODIFICACIÓN 2: Añadimos 'IdCliente' al INSERT SQL
-        const pedidoQuery = 'INSERT INTO Pedidos (IdCliente, Total, IdUsuario, Estado) VALUES (?, ?, ?, "Pendiente")';
-        
-        // 🚨 MODIFICACIÓN 3: Pasamos 'idCliente' como primer parámetro
-        const [pedidoResult] = await connection.query(pedidoQuery, [idCliente, total, idUsuario]);
-        const idPedido = pedidoResult.insertId;
-
-        // 2. Insertar cada producto en DETALLE_PEDIDOS y actualizar stock (ESTO NO CAMBIA, ya funciona)
-        for (const producto of productos) {
-            // ... (el resto del for loop es correcto)
-        }
-// ... (resto del try/catch/finally)
-
-    try {
-        connection = await pool.getConnection();
-        await connection.beginTransaction();
-
-        // 1. Insertar en la tabla PEDIDOS
-        const pedidoQuery = 'INSERT INTO Pedidos (Total, IdUsuario, Estado) VALUES (?, ?, "Pendiente")';
-        const [pedidoResult] = await connection.query(pedidoQuery, [total, idUsuario]);
-        const idPedido = pedidoResult.insertId;
-
-        // 2. Insertar cada producto en DETALLE_PEDIDOS y actualizar stock
-        for (const producto of productos) {
-            // Insertar detalle
-            await connection.query(
-                'INSERT INTO Detalle_Pedidos (IdPedido, IdProducto, Cantidad, Subtotal) VALUES (?, ?, ?, ?)',
-                [idPedido, producto.id, producto.cantidad, producto.subtotal]
-            );
-
-            // Actualizar stock
-            await connection.query(
-                'UPDATE Productos SET Stock = Stock - ? WHERE IdProducto = ?',
-                [producto.cantidad, producto.id]
-            );
-        }
-
-        // Confirmar la transacción
-        await connection.commit();
-        res.json({ 
-            success: true, 
-            message: 'Pedido registrado correctamente',
-            idPedido 
-        });
-
-    } catch (error) {
-        if (connection) {
-            await connection.rollback();
-        }
-        console.error('Error al registrar pedido:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Error al registrar el pedido' 
-        });
-    } finally {
-        if (connection) {
-            connection.release();
-        }
-    }
-});*/
-
-
-
-// Obtener todos los pedidos
-/*app.get('/api/pedidos', async (req, res) => {
-    try {
-        const query = `
-            SELECT 
-                p.IdPedido,
-                p.Total,
-                p.Estado,
-                p.Fecha,
-                u.Email as Usuario,
-                GROUP_CONCAT(
-                    CONCAT(pr.Nombre, ' (', dp.Cantidad, ')')
-                    SEPARATOR ', '
-                ) as Productos
-            FROM Pedidos p
-            JOIN Usuarios u ON p.IdUsuario = u.IdUsuario
-            JOIN detallepedidos dp ON p.IdPedido = dp.IdPedido
-            JOIN Productos pr ON dp.IdProducto = pr.IdProducto
-            GROUP BY p.IdPedido
-            ORDER BY p.Fecha DESC
-        `;
-        
-        const [results] = await pool.query(query);
-        res.json(results);
-    } catch (error) {
-        console.error('Error al obtener pedidos:', error);
-        res.status(500).json({ error: 'Error al obtener pedidos' });
-    }
-});*/
-
-/*// Actualizar estado de un pedido
-app.put('/api/pedidos/:id/estado', async (req, res) => {
-    const { id } = req.params;
-    const { estado } = req.body;
-    
-    try {
-        await pool.query(
-            'UPDATE Pedidos SET Estado = ? WHERE IdPedido = ?',
-            [estado, id]
-        );
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Error al actualizar estado:', error);
-        res.status(500).json({ error: 'Error al actualizar estado del pedido' });
-    }
-});*/
 
 // ====================================================================
 // PASO 4: INICIAR EL SERVIDOR
