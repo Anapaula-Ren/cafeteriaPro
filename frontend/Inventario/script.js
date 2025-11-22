@@ -278,6 +278,28 @@ function cerrarModalOrdenar() {
 function agregarEventListeners() {
     console.log('🔗 Configurando event listeners...');
     
+    //logica de control de acceso
+    const userRole = localStorage.getItem('usuarioRol');
+    const rolesNoPermitidos = ['Cajero/Mesero']; // Roles que solo deben ver
+    if (rolesNoPermitidos.includes(userRole)) {
+        // Deshabilitar todos los botones de edición y ordenar para el Mesero/Cajero
+        document.querySelectorAll('.btn_editar, .btn_ordenar').forEach((btn) => {
+            btn.disabled = true;
+            btn.style.opacity = '0.4'; // Retroalimentación visual de que está deshabilitado
+            btn.style.cursor = 'not-allowed';
+            
+            // Opcional: Si el botón intenta abrir un modal, esto lo previene:
+            btn.onclick = (e) => {
+                e.stopPropagation(); // Prevenir que el evento suba
+                alert('Acceso de modificación restringido al rol de ' + userRole);
+            };
+        });
+        
+        // Finalizar la función aquí, sin adjuntar los event listeners originales
+        return; 
+    }
+    //fiin
+
     // Botones editar
     const botonesEditar = document.querySelectorAll('.btn_editar');
     botonesEditar.forEach((boton) => {
@@ -390,177 +412,5 @@ document.addEventListener('DOMContentLoaded', function() {
         cargarProductos();
     }, 100);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*document.addEventListener('DOMContentLoaded', () => {
-    // ====================================================================
-    // 1. REFERENCIAS GLOBALES (Usando clases para manejar múltiples botones)
-    // ====================================================================
-    const modalEditar = document.getElementById('modal_editar');
-    const spanCerrar = document.querySelector('#modal_editar .cerrar');
-    const btnCancelar = document.querySelector('#modal_editar .btn_cancelar');
-    const formModal = document.getElementById('form_modal');
-    
-    // Referencias para el modal de edición
-    const inputNombreProductoModal = document.getElementById('nombre_producto');
-    const inputCantidadGramosModal = document.getElementById('cantidad_gramos');
-    
-    let productoActivo = null; // Variable para rastrear el producto que se está editando/ordenando
-
-    // ====================================================================
-    // 2. LÓGICA DEL MODAL DE EDICIÓN (ADAPTADO A CLASES)
-    // ====================================================================
-    document.querySelectorAll('.btn_editar').forEach(button => {
-        button.addEventListener('click', function() {
-            // 1. Identificar el producto padre
-            const productoDiv = this.closest('.producto');
-            productoActivo = productoDiv; // Guarda la referencia del div
-            
-            // 2. Obtener datos usando el elemento padre
-            const nombre = productoDiv.querySelector('.producto-nombre').textContent.trim();
-            const cantidadGramos = productoDiv.querySelector('.producto-cantidad').value;
-
-            // 3. Abrir modal y cargar valores
-            inputNombreProductoModal.value = nombre;
-            inputCantidadGramosModal.value = cantidadGramos;
-            modalEditar.style.display = 'flex';
-            modalEditar.style.justifyContent = 'center';
-            modalEditar.style.alignItems = 'center';
-        });
-    });
-
-    // Manejar el envío del formulario de EDICIÓN
-    formModal.onsubmit = function(e) {
-        e.preventDefault();
-        
-        if (productoActivo) {
-            // Obtener el input de cantidad de la vista principal del producto activo
-            const inputPrincipal = productoActivo.querySelector('.producto-cantidad');
-            
-            // Actualizar el valor en la vista principal
-            inputPrincipal.value = inputCantidadGramosModal.value;
-            
-            // Aquí iría el código de envío al servidor para actualizar la DB
-            // console.log('Actualizando DB: ', inputPrincipal.value);
-            
-            alert('Cantidad actualizada correctamente');
-        }
-        
-        modalEditar.style.display = 'none';
-    }
-
-    // Cierre del modal de Edición (X y Cancelar)
-    spanCerrar.onclick = function() { modalEditar.style.display = 'none'; }        
-    btnCancelar.onclick = function() { modalEditar.style.display = 'none'; }        
-    window.onclick = function(event) {
-        if (event.target == modalEditar || event.target == ordenModal) {
-            event.target.style.display = 'none';
-        }
-    }
-
-
-    // ====================================================================
-    // 3. LÓGICA DEL MODAL DE ORDENAR CORREO
-    // ====================================================================
-    const ordenModal = document.getElementById('ordenModal');
-    const closeButton = ordenModal.querySelector('.close-button');
-    const ordenForm = document.getElementById('ordenForm');
-    const productoTitulo = document.getElementById('productoTitulo');
-    const ordenProductoNombre = document.getElementById('ordenProductoNombre');
-    const ordenDestinoInput = document.getElementById('ordenDestino');
-
-    // Función para Abrir el Modal de Ordenar
-    function openOrderModal(productName) {
-        productoTitulo.textContent = productName;
-        ordenProductoNombre.value = productName;
-        document.getElementById('ordenCantidad').value = 1; 
-        document.getElementById('ordenMotivo').value = '';
-        ordenModal.style.display = 'flex';
-        ordenModal.style.justifyContent = 'center';
-        ordenModal.style.alignItems = 'center';
-    }
-
-    // Adjuntar la función al clic de todos los botones de "Ordenar"
-    document.querySelectorAll('.btn_ordenar').forEach(button => { // ⬅️ USANDO LA CLASE
-        button.addEventListener('click', function(e) {
-            // Encuentra el nombre del producto asociado a este botón
-            const productName = this.closest('.producto').querySelector('.producto-nombre').textContent.trim();
-            openOrderModal(productName);
-        });
-    });
-    
-    // Cierre del Modal de Ordenar
-    closeButton.addEventListener('click', () => {
-        ordenModal.style.display = 'none';
-    });
-
-    // 4. Lógica de Envío del Correo (Llama a la API de Node.js)
-    ordenForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const producto = ordenProductoNombre.value;
-        const cantidad = document.getElementById('ordenCantidad').value;
-        const motivo = document.getElementById('ordenMotivo').value;
-        const destino = ordenDestinoInput.value;
-        const usuarioNombre = localStorage.getItem('usuarioNombre'); 
-
-        const orderData = {
-            producto,
-            cantidad: parseInt(cantidad, 10),
-            motivo,
-            destino,
-            usuarioNombre 
-        };
-
-        try {
-            const response = await fetch('http://localhost:3000/api/ordenar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData)
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                alert(`✅ ${data.message}`);
-                ordenModal.style.display = 'none';
-            } else {
-                alert(`❌ Error al enviar orden: ${data.message || 'Error de servidor desconocido'}`);
-            }
-
-        } catch (error) {
-            console.error('Error de conexión con la API de Correo:', error);
-            alert('❌ Error de conexión. Verifique el servidor Node.js.');
-        }
-    });
-});*/
-
-
-
 
 

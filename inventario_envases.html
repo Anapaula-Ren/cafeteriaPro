@@ -133,4 +133,33 @@
         </nav>
     </footer>
     <script src="script.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const userRole = localStorage.getItem('usuarioRol');
+        
+        // Roles que tienen permiso para ver el enlace de Inventario
+        const rolesConInventario = ['Administrador', 'Encargado de inventario'];
+
+        // Si el usuario tiene un rol y NO es un rol de inventario/admin:
+        if (userRole && !rolesConInventario.includes(userRole)) {
+            
+            // Ocultar el enlace de "Inventario" en la barra de navegación
+            const navLinks = document.querySelectorAll('header nav a');
+            
+            navLinks.forEach(link => {
+                const linkText = link.textContent.trim();
+                const linkHref = link.getAttribute('href') || '';
+                
+                // Buscar por el texto "Inventario" o por la URL que lo contenga
+                if (linkText === 'Inventario' || linkHref.includes('Inventario/')) {
+                    link.style.display = 'none';
+                    // Nota: Si el Mesero no debe ver el Panel, también lo ocultarías aquí:
+                    // if (linkText === 'Panel') { link.style.display = 'none'; }
+                }
+            });
+        }
+    });
+</script>
 </body>
+</html>
+
