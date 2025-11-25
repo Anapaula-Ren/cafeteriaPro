@@ -268,10 +268,10 @@ app.post('/api/pedidos', async (req, res) => {
             );
 
             // Actualizar stock (Productos)
-            await connection.query(
+            /*await connection.query(
                 'UPDATE Productos SET Stock = Stock - ? WHERE IdProducto = ?',
                 [producto.cantidad, producto.id]
-            );
+            );*/
         }
 
         // 4. Confirmar la transacción
@@ -286,10 +286,13 @@ app.post('/api/pedidos', async (req, res) => {
         if (connection) {
             await connection.rollback();
         }
-        console.error('Error al registrar pedido:', error);
+        // Imprime el error en la consola negra
+        console.error('❌ ERROR REAL:', error.sqlMessage || error.message);
+
         res.status(500).json({ 
             success: false, 
-            message: 'Error al registrar el pedido' 
+            // CAMBIO: Usamos la variable error.sqlMessage en lugar del texto fijo
+            message: error.sqlMessage || error.message
         });
     } finally {
         if (connection) {
@@ -340,6 +343,36 @@ app.post('/api/ordenar', async (req, res) => {
     }
 });
 
+// ======================================
+// RUTA: Obtener pedidos completados
+// ======================================
+app.get('/api/pedidos/completados', async (req, res) => {
+    try {
+        const query = `
+            SELECT
+              p.IdPedido,
+              p.IdCliente,
+              c.Nombre AS NombreCliente,
+              p.Fecha,
+              p.Total,
+              u.IdUsuario,
+              u.Nombre AS NombreUsuario,
+              p.Estado
+              FROM Pedidos p
+              JOIN Clientes c ON p.IdCliente = c.IdCliente
+              JOIN Usuarios u ON p.IdUsuario = u.IdUsuario
+              WHERE p.Estado = 'Completado'
+              ORDER BY p.Fecha DESC;
+                  `;
+ 
+        const [results] = await pool.query(query);
+        res.json(results);
+ 
+    } catch (error) {
+        console.error('Error al obtener pedidos completados:', error);
+        res.status(500).json({ error: 'Error al obtener pedidos completados' });
+    }
+});
 
 
 // ====================================================================
