@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
     <link rel="stylesheet" href="estiloso.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <header>
         <!--Menu de inicio-->
@@ -19,18 +21,19 @@
             <a href="../Gestion de pedidos.html">Pedidos</a>
             <a href="#" class="activo">Inventario</a>
             <a href="../Panel.html">Panel</a>
+            <a href="../Usuarios.html" id="linkUsuarios" style="display:none;">Usuarios</a>
             <a href="../InicioSesion.html">Cerrar sesion</a>
         </nav>
     </header>
     <main>
         <h2 style="font-size: 32px; font-weight: bold;">Inventario</h2>
-        <section class="menu_inventario">   
+        <section class="menu_inventario">
             <a href="inventario_bebidas.html"><button>Bebidas</button></a>
             <a href="inventario_comidas.html"><button>Comida</button></a>
             <a href="inventario_envases.html"><button>Envases</button></a>
             <a href="inventario_limpieza.html"><button>Limpieza</button></a>
         </section>
-        
+
     </main>
     <!--Pie de página-->
     <footer>
@@ -42,6 +45,14 @@
         </nav>
     </footer>
     <script src="script.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const rol = localStorage.getItem("usuarioRol");
+            if (rol === "Administrador") {
+                document.getElementById("linkUsuarios").style.display = "inline-block";
+            }
+        });
+    </script>
 </body>
-</html>
 
+</html>
