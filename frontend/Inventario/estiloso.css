@@ -1,14 +1,14 @@
 body {
     font-family: 'Poppins', sans-serif;
-  margin: 0;
-  background: linear-gradient(to bottom, #f7f4f2, #ece1dc);
-  color: #3e2e2a;
+    margin: 0;
+    background: linear-gradient(to bottom, #f7f4f2, #ece1dc);
+    color: #3e2e2a;
 }
 main { 
     box-sizing: border-box; 
     padding: 40px; 
-    margin: 20px auto;
-    padding: 20px 40px 40px 40px;
+    margin: 10px auto;
+    padding: 15px 40px 40px 40px;
     border-radius: 10px;
     min-height: calc(100vh - 250px);
 }
@@ -16,7 +16,7 @@ h2 {
     font-size: 32px;
     font-weight: bold;
     color: #3b1f1f;
-    margin: 0 0 7px 0;
+    margin: 0 0 5px 0;
     text-align: center;
 }
 
@@ -65,12 +65,12 @@ footer {
     padding: 20px 10px;
     margin-top: 30px;
     font-size: 14px;
-    display: block; /* Cambiado de flex a block */
+    display: block;
     position: fixed;
-  bottom: 0;        /* para el footer */
-  left: 0;
-  right: 0;
-  height: auto
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: auto;
 }
 
 footer p {
@@ -93,27 +93,31 @@ footer nav a:hover {
     color: #ffddbc;
     text-decoration: underline;
 }
+
+/* ==================== MENÚ DE INVENTARIO MEJORADO ==================== */
 .menu_inventario {
     display: flex;
     flex-direction: column;   
     align-items: center;      
     justify-content: center;  
-    gap: 25px;                
+    gap: 25px;
     height: 60vh;             
+    padding: 15px 0;
 }
 .menu_inventario button {
     background-color: #d7ccc8;
     color: #3e2723;
     font-size: 1.4rem;
     font-weight: bold;
-    padding: 18px 80px;       
+    padding: 18px 80px;
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    width: 300px;             
+    width: 320px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     transition: all 0.3s ease;
     text-align: center;
+    line-height: 1.4;         
 }
 .menu_inventario button:hover {
     background-color: #a1887f;
@@ -125,11 +129,178 @@ footer nav a:hover {
     text-decoration: none;
     margin: 0 5px;
 }
+
+/* ==================== BOTÓN DE REPORTE MEJORADO (NUEVO COLOR AZUL) ==================== */
+.reportes-container {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-reportes {
+    /* NUEVO COLOR: Azul profesional */
+    background-color: #1976d2; 
+    color: white;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    width: 280px;
+    height: 80px;
+    align-self: center;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    text-align: center;
+    line-height: 1.2;
+    white-space: normal;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
+    transition: all 0.3s ease;
+}
+
+.btn-reportes:hover {
+    background-color: #1565c0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(25, 118, 210, 0.5);
+}
+
+/* ==================== ESTILOS DEL MODAL ==================== */
+.modal {
+    position: fixed;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 500;
+}
+
+.modal-content {
+    background: white;
+    width: 60%;
+    max-height: 80%;
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.3);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ENCABEZADO DEL MODAL ALINEADO A LA IZQUIERDA */
+.modal-content h2 {
+    margin: 0;
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+    color: #2c3e50;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left; /* Alineado a la izquierda */
+    justify-content: flex-start; /* Alineado a la izquierda */
+}
+
+.modal-content h2 i {
+    color: #5a3d31;
+}
+
+.close-btn {
+    float: right;
+    font-size: 25px;
+    cursor: pointer;
+    color: #5a3d31;
+    transition: color 0.3s;
+    background: none;
+    border: none;
+}
+
+.close-btn:hover {
+    color: #ff6b6b;
+}
+
+/* ==================== ESTILOS PARA TABLAS (IGUAL AL PANEL) ==================== */
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.detail-table th,
+.detail-table td {
+    text-align: left;
+    padding: 8px 0;
+    border-bottom: 1px dashed #aaa;
+}
+
+.detail-table th {
+    color: #5a3d31;
+    font-weight: 600;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+
+    header nav a {
+        display: inline-block;
+        margin: 10px;
+    }
+
+    footer {
+        padding: 20px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+        margin: 10px;
+    }
+    
+    .btn-reportes {
+        padding: 12px 30px;
+        font-size: 14px;
+        width: 260px;
+        height: 70px;
+        box-shadow: 0 3px 8px rgba(25, 118, 210, 0.3);
+    }
+    
+    .menu_inventario {
+        gap: 20px;
+    }
+    
+    .menu_inventario button {
+        width: 280px;
+        padding: 16px 60px;
+    }
+    
+    main {
+        margin: 5px auto;
+        padding: 10px 20px 40px 20px;
+    }
+    
+    .modal-content h2 {
+        padding: 15px 20px;
+        font-size: 1.3em;
+    }
+}
+
+/* ==================== ESTILOS EXISTENTES DEL INVENTARIO ==================== */
 .inventario {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    column-gap: 8px; /* espacio entre columnas */
-    row-gap: 16px;    /* reduce el espacio vertical */
+    column-gap: 8px;
+    row-gap: 16px;
     padding: 10px 30px;
     max-width: 1800px; 
     margin: 0 auto;
@@ -193,17 +364,8 @@ input[type="number"] {
 .botones button:hover {
     background-color: #4e342e;
 }
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    justify-content: center;
-    align-items: center;
-    animation: fadeIn 0.3s ease-in-out;
-}
+
+/* Modal de edición (existente) */
 .modal_contenido {
     background: linear-gradient(180deg, #ffffff 0%, #f7f3f0 100%);
     border-radius: 10px;
@@ -302,20 +464,4 @@ h4 {
 @keyframes popIn {
     from { transform: scale(0.9); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
-}
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        text-align: center;
-        padding: 15px;
-    }
-
-    header nav a {
-        display: inline-block;
-        margin: 10px;
-    }
-
-    footer {
-        padding: 20px;
-    }
 }

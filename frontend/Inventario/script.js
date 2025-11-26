@@ -219,6 +219,135 @@ async function actualizarProducto(nombreProducto, nuevaCantidad) {
     }
 }
 
+// ==================== FUNCIONES PARA REPORTE DE INVENTARIO ====================
+
+// Cargar reporte completo de inventario
+async function cargarReporteInventario() {
+    try {
+        console.log('📊 Cargando reporte de inventario completo...');
+        
+        // Obtener datos de todas las categorías
+        const categorias = [
+            { id: 1, nombre: 'Bebidas' },
+            { id: 2, nombre: 'Comidas' },
+            { id: 3, nombre: 'Envases' },
+            { id: 4, nombre: 'Limpieza' }
+        ];
+        
+        let inventarioCompleto = [];
+
+        // Cargar productos de cada categoría
+        for (const categoria of categorias) {
+            try {
+                const response = await fetch(`${API_URL}/api/inventario/categoria/${categoria.id}`);
+                
+                if (response.ok) {
+                    const productos = await response.json();
+                    
+                    // Agregar información de categoría a cada producto
+                    const productosConCategoria = productos.map(producto => ({
+                        ...producto,
+                        Categoria: categoria.nombre
+                    }));
+                    
+                    inventarioCompleto = inventarioCompleto.concat(productosConCategoria);
+                }
+            } catch (error) {
+                console.log(`Error cargando ${categoria.nombre}:`, error);
+            }
+        }
+
+        // Generar y mostrar el reporte
+        generarHTMLReporte(inventarioCompleto);
+
+    } catch (error) {
+        console.error('❌ Error al cargar reporte de inventario:', error);
+        const tablaReporteInventario = document.getElementById('tablaReporteInventario');
+        if (tablaReporteInventario) {
+            tablaReporteInventario.innerHTML = `
+                <div style="color: red; text-align: center; padding: 20px;">
+                    <h3>Error al cargar el reporte</h3>
+                    <p>${error.message}</p>
+                    <button onclick="cargarReporteInventario()" class="btn-reportes" style="margin-top: 10px;">
+                        Reintentar
+                    </button>
+                </div>
+            `;
+        }
+    }
+}
+
+// Generar HTML del reporte con diseño IDÉNTICO al panel
+function generarHTMLReporte(inventario) {
+    const tablaReporteInventario = document.getElementById('tablaReporteInventario');
+    if (!tablaReporteInventario) {
+        console.error('❌ No se encontró el elemento tablaReporteInventario');
+        return;
+    }
+
+    // Ordenar por IdInventario (numéricamente)
+    inventario.sort((a, b) => {
+        const idA = parseInt(a.IdInventario) || 0;
+        const idB = parseInt(b.IdInventario) || 0;
+        return idA - idB; // Orden ascendente por ID
+    });
+
+    let html = `
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    // Generar filas de productos
+    inventario.forEach(item => {
+        const cantidad = parseInt(item.Cantidad) || 0;
+        
+        html += `
+                <tr>
+                    <td>${item.IdInventario || 'N/A'}</td>
+                    <td>${item.NombreProducto || 'Producto sin nombre'}</td>
+                    <td>${item.Categoria}</td>
+                    <td>${cantidad}</td>
+                </tr>
+        `;
+    });
+
+    html += `
+            </tbody>
+        </table>
+    `;
+
+    console.log('🔄 Generando HTML del reporte con diseño idéntico al panel...');
+    tablaReporteInventario.innerHTML = html;
+}
+
+// Abrir modal de reporte
+function abrirModalReporte() {
+    const modalReporteInventario = document.getElementById('modalReporteInventario');
+    if (modalReporteInventario) {
+        modalReporteInventario.style.display = 'flex';
+        console.log('✅ Modal abierto, cargando reporte...');
+        cargarReporteInventario();
+    } else {
+        console.error('❌ Modal de reporte no encontrado');
+    }
+}
+
+// Cerrar modal de reporte
+function cerrarModalReporte() {
+    const modalReporteInventario = document.getElementById('modalReporteInventario');
+    if (modalReporteInventario) {
+        modalReporteInventario.style.display = 'none';
+    }
+}
+
 // ==================== FUNCIONES PARA CORREOS ====================
 
 // Función para Abrir el Modal de Ordenar
@@ -278,27 +407,40 @@ function cerrarModalOrdenar() {
 function agregarEventListeners() {
     console.log('🔗 Configurando event listeners...');
     
-    //logica de control de acceso
+    // Lógica de control de acceso
     const userRole = localStorage.getItem('usuarioRol');
-    const rolesNoPermitidos = ['Cajero/Mesero']; // Roles que solo deben ver
+    const rolesNoPermitidos = ['Cajero/Mesero'];
+    
     if (rolesNoPermitidos.includes(userRole)) {
         // Deshabilitar todos los botones de edición y ordenar para el Mesero/Cajero
         document.querySelectorAll('.btn_editar, .btn_ordenar').forEach((btn) => {
             btn.disabled = true;
-            btn.style.opacity = '0.4'; // Retroalimentación visual de que está deshabilitado
+            btn.style.opacity = '0.4';
             btn.style.cursor = 'not-allowed';
             
-            // Opcional: Si el botón intenta abrir un modal, esto lo previene:
             btn.onclick = (e) => {
-                e.stopPropagation(); // Prevenir que el evento suba
+                e.stopPropagation();
                 alert('Acceso de modificación restringido al rol de ' + userRole);
             };
         });
         
-        // Finalizar la función aquí, sin adjuntar los event listeners originales
-        return; 
+        // También ocultar el botón de reporte para roles no autorizados
+        const btnReporteInventario = document.getElementById('btnReporteInventario');
+        if (btnReporteInventario) {
+            btnReporteInventario.style.display = 'none';
+        }
+        
+        return;
     }
-    //fiin
+    
+    // Configurar botón de reporte de inventario
+    const btnReporteInventario = document.getElementById('btnReporteInventario');
+    if (btnReporteInventario) {
+        btnReporteInventario.addEventListener('click', abrirModalReporte);
+        console.log('✅ Event listener del botón de reporte configurado');
+    } else {
+        console.error('❌ Botón de reporte no encontrado');
+    }
 
     // Botones editar
     const botonesEditar = document.querySelectorAll('.btn_editar');
@@ -332,23 +474,25 @@ function agregarEventListeners() {
 }
 
 // Event listeners del modal editar
-formModal.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    if (!productoNombreActual) {
-        alert('Error: No hay un producto seleccionado');
-        return;
-    }
+if (formModal) {
+    formModal.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (!productoNombreActual) {
+            alert('Error: No hay un producto seleccionado');
+            return;
+        }
 
-    const nuevaCantidad = parseInt(cantidadTotalInput.value);
-    
-    if (isNaN(nuevaCantidad) || nuevaCantidad < 0) {
-        alert('Por favor ingrese una cantidad válida (número entero positivo)');
-        return;
-    }
+        const nuevaCantidad = parseInt(cantidadTotalInput.value);
+        
+        if (isNaN(nuevaCantidad) || nuevaCantidad < 0) {
+            alert('Por favor ingrese una cantidad válida (número entero positivo)');
+            return;
+        }
 
-    await actualizarProducto(productoNombreActual, nuevaCantidad);
-});
+        await actualizarProducto(productoNombreActual, nuevaCantidad);
+    });
+}
 
 // Event listeners del modal ordenar
 if (ordenForm) {
@@ -373,17 +517,35 @@ if (ordenForm) {
     });
 }
 
-// Cerrar modales
-spanCerrar?.addEventListener('click', cerrarModal);
-btnCancelar?.addEventListener('click', cerrarModal);
-closeButton?.addEventListener('click', cerrarModalOrdenar);
+// ==================== CONFIGURACIÓN DE EVENT LISTENERS GLOBALES ====================
 
+// Cerrar modales
+if (spanCerrar) {
+    spanCerrar.addEventListener('click', cerrarModal);
+}
+if (btnCancelar) {
+    btnCancelar.addEventListener('click', cerrarModal);
+}
+if (closeButton) {
+    closeButton.addEventListener('click', cerrarModalOrdenar);
+}
+
+const closeReporteInventario = document.getElementById('closeReporteInventario');
+if (closeReporteInventario) {
+    closeReporteInventario.addEventListener('click', cerrarModalReporte);
+}
+
+// Cerrar modales al hacer clic fuera
 window.addEventListener('click', function(event) {
     if (event.target === modal) {
         cerrarModal();
     }
     if (event.target === ordenModal) {
         cerrarModalOrdenar();
+    }
+    const modalReporteInventario = document.getElementById('modalReporteInventario');
+    if (event.target === modalReporteInventario) {
+        cerrarModalReporte();
     }
 });
 
@@ -407,10 +569,23 @@ function mostrarErrorCarga(error) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Inicializando sistema de inventario...');
     
+    // Configurar el botón de reporte inmediatamente
+    const btnReporteInventario = document.getElementById('btnReporteInventario');
+    if (btnReporteInventario) {
+        console.log('✅ Botón de reporte encontrado, configurando evento...');
+        btnReporteInventario.addEventListener('click', abrirModalReporte);
+    } else {
+        console.error('❌ Botón de reporte no encontrado en el DOM');
+    }
+
+    // Configurar el cierre del modal de reporte
+    const closeReporteInventario = document.getElementById('closeReporteInventario');
+    if (closeReporteInventario) {
+        closeReporteInventario.addEventListener('click', cerrarModalReporte);
+    }
+
     // Cargar productos después de que el DOM esté listo
     setTimeout(() => {
         cargarProductos();
     }, 100);
 });
-
-
