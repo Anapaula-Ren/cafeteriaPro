@@ -1,6 +1,17 @@
 // ==================== CONFIGURACIÓN ====================
 const API_URL = 'http://localhost:3000';
+//restriccion 
+const userRole = localStorage.getItem('usuarioRol');
 
+  if (userRole === 'Encargado de inventario') {
+      // Encargado de Inventario (Debe ver: Inicio, Inventario, Cerrar Sesión)
+      const pedidosLink = document.querySelector('nav a[href*="Gestion de pedidos.html"]');
+      const panelLink = document.querySelector('nav a[href*="Panel.html"]');
+      
+      // 2. Restricción del Encargado: Ocultar Pedidos y Panel
+      if (pedidosLink) pedidosLink.style.display = 'none';
+      if (panelLink) panelLink.style.display = 'none';
+  }
 // ==================== ELEMENTOS DEL DOM ====================
 const modal = document.getElementById('modal_editar');
 const spanCerrar = document.getElementsByClassName('cerrar')[0];
@@ -9,6 +20,8 @@ const formModal = document.getElementById('form_modal');
 const inputNombreProducto = document.getElementById('nombre_producto');
 const cantidadTotalInput = document.getElementById('cantidad_total');
 const contenedorInventario = document.querySelector('.inventario');
+//===================Restricciones=====================
+
 
 // ==================== ELEMENTOS DEL MODAL ORDENAR ====================
 const ordenModal = document.getElementById('ordenModal');
